@@ -1,0 +1,4 @@
+include LICENSE
+include README.rst
+recursive-include nla_control/static *
+recursive-include nla_control/templates *

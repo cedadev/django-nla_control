@@ -1,0 +1,61 @@
+CHANGELOG for nla_control
+=========================
+
+0.1 -> 0.2
+==========
+
+1. Added ``RestoreDisk`` model.  This allows multiple locations to restore files to.  These
+   may be separate disks or areas of the same disks.  ``RestoreDisks`` can be added via the
+   Django admin webpages.  When the request is processed the ``process_requests`` script finds
+   a ``RestoreDisk`` with enough space free to hold the request.
+   
+2. Quotas are now enforced.  Users who have exceeded their quota will not be able to make
+   any further requests.  Also, users are prevented from making requests that will exceed
+   their quota.
+
+3. Removed ``VerifyLogs`` model - no longer needed.
+
+4. Implemented a test system which is independent of the actual tape archive.  See: 
+   https://breezy.badc.rl.ac.uk/nrmassey/cedanla-test-playbook
+
+0.2 -> 0.3
+==========
+
+1. Requests to restore files are now persistent.  This means that files can be requested
+   which are not currently in the NLA system, or even in the archive.  As the files are
+   added to the NLA system (via the archive) the process_requests script will recognise
+   that these files are now available and restore them.  This works for both pattern_requests
+   and listing_requests.  For example, for a pattern_request of MSLP_2017, when the
+   ``process_requests`` script is first run it will restore all files that have "MSLP_2017"
+   in their filename.  As more files which match the pattern are added to tapte throughout
+   2017, the ``process_requests`` script will recognise the new files and restore them.
+
+2. Email notifications have now been implemented.
+
+3. The restore process (process_requests) now fills in the ``first_files_on_disk`` and
+   ``last_files_on_disk`` fields in TapeRequest.
+
+4. Removed ``DELETED`` state from ``TapeFile.``
+
+5. Users are limited to two requests being processed at any one time.  Users can make
+   multiple requests, but only two will be processed at a time.
+   
+6. Fixed a problem with multiple checksum logs.  The checksum process (run by Brian Coan)
+   might create more than one file of checksums for each fileset, especially if the process
+   is interrupted or the process is run, more files become available and the process is
+   run a second time to get the checksums for the new files.  Previously only the first
+   checksum file for the fileset was checked.  This has been fixed so that the checksum 
+   files are checked in order, with the newest first, until a file with ``stage==VERIFY``
+   is found.  (All files after this point should already have been verified and it saves
+   processing time by only verifying the new files).
+   
+7. Fixed a problem where expiring two requests with common files would cause the common
+   files to be removed from the NLA system due to the logic of the ``tidy_requests`` 
+   script.  This has been fixed by checking that the files to be removed have the status
+   of ``stage==RESTORED``.  In this case, when the first request is expired the common
+   files will then have ``stage==ONTAPE`` so there will be no attempt to remove them a
+   second time.
+   
+8. Fixed a problem where requests could be loaded into more than one slot if the
+   ``process_requests`` is run repeatably.  Requests are only now added to slots if no
+   other slots contains the same ``TapeRequest``.

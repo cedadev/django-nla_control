@@ -1,0 +1,123 @@
+#!/usr/bin/env python
+# sd_get: Command-line tool to download large numbers of files from StorageD
+
+import sys
+import os
+import getopt
+import logging
+import shutil
+import time
+
+FAKE_TAPE_DIR = "/home/www/faketape"
+
+
+# Create a variable to represent the logger, this will be configured to send logs to a file  if logging has been chosen
+logLevel = logging.ERROR
+defaultHandler = logging.StreamHandler(sys.stdout)
+logFormat = '[%(asctime)s] %(levelname)s %(name)s: %(message)s'
+defaultFormatter = logging.Formatter( fmt=logFormat )
+defaultHandler.setFormatter( defaultFormatter )
+logger = logging.getLogger( 'StorageD' )
+logger.addHandler( defaultHandler )
+logger.setLevel( logLevel )
+
+
+# this is an sdclient.getFiles emulator
+def sdclient_getFiles(fileList, localDir):
+    # all we need to do is copy all of the files from the fileList to localDir
+    # manipulating the files in fileList to point to those in the FAKE_TAPE_DIR
+    # now copy all the data
+    error_files = []
+    # go to sleep for a while to emulate a delay
+    time.sleep(180)  # 30s currently
+    for f in fileList:
+        try:
+            # get the name of the file on fake tape
+            f_name = f.split("/")[-1]
+            # create destination output
+            dest_name = os.path.join(localDir, f_name)
+            # output to logger so that watch_sd_get can monitor when it has finished
+            logger.info("Copying file: " + f + " to " + dest_name)
+            # get the fully qualified fake tape name
+            f_tape = os.path.join(FAKE_TAPE_DIR, f_name)
+            # copy the file
+            shutil.copyfile(f_tape, dest_name)
+        except:
+            error_files.append(f)
+    return error_files
+
+# Default settings for parameters
+
+timeout = 3600 # Default 1 hour timeout
+localDir = ''
+host = ''
+port = 7456
+fileDownloadCount = 100000 # Set an arbitrary maximum number of files in a single retrieval request
+timer = None
+badFiles = []
+
+def usage():
+    sys.stderr.write( """Usage:
+    sd_get_emulator [ -v ] [ -l logfile ] [ -p port ] -f sourcefile  -r restoredirectory
+    """ )
+
+def downloadFromFilelist( sourceFileList ):
+    global timer, badFiles
+
+    chosenFiles = []
+    f = open( sourceFileList, 'r' )
+
+    for line in f:
+        line = line.rstrip('\n')
+        logger.debug('Read filename %s from source file %s'%(line,sourceFileList) )
+        chosenFiles.append( line )
+    if len(chosenFiles) > 0:
+        badFiles += sdclient_getFiles( chosenFiles, localDir )
+
+
+if __name__ == '__main__':
+    sourceFileList = None
+    logFile = ''
+    try:
+        opts, args = getopt.getopt( sys.argv[1:], 'vf:d:r:l:h:p:t:' )
+    except getopt.GetoptError,err:
+        print(str(err))
+        usage()
+        sys.exit( 1 )
+
+    for o, a in opts:
+        if o == '-v':
+            logLevel = logging.DEBUG
+            logger.setLevel( logLevel )
+        elif o == '-f':
+            if not os.access( a, os.R_OK ):
+                sys.stderr.write( "Cannot read provided source file list\n" )
+                usage()
+                sys.exit( 1 )
+            sourceFileList = a
+        elif o == '-l':
+            if not os.access( os.path.dirname( a ), os.W_OK ):
+                sys.stderr.write( "No permission to write to supplied logfile\n" )
+                usage()
+                sys.exit( 1 )
+            logFile = a
+            h = logging.FileHandler( logFile )
+            h.setFormatter( defaultFormatter )
+            logger.addHandler( h )
+            logger.removeHandler( defaultHandler )
+            logger.setLevel( logLevel )
+        elif o == '-r':
+            localDir = a
+
+    if sourceFileList is not None:
+        logger.info( 'Reading files from source list %s'%(sourceFileList) )
+        downloadFromFilelist( sourceFileList )
+    else:
+        sys.stderr.write( "Must provide a source file list\n" )
+        usage()
+        sys.exit( 1 )
+
+    if len(badFiles) > 0:
+        sys.stderr.write( "Could not download the following files:\n" )
+        for f in badFiles:
+            sys.stderr.write( '%s\n'%(f) )
