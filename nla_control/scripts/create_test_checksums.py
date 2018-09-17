@@ -13,7 +13,7 @@ tape.
 __author__ = 'dhk63261' # NRM
 
 from nla_control.models import TapeFile
-from nla_site.settings import *
+from nla_control.settings import *
 import datetime
 import subprocess
 

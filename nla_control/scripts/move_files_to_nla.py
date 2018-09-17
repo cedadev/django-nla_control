@@ -15,10 +15,9 @@
 # SJP 2016-02-09
 
 from nla_control.models import TapeFile
-from nla_control.scripts.logging import setup_logging
 import os, sys
-import requests
-from nla_site.settings import *
+import urllib2
+from nla_control.settings import *
 import subprocess
 
 __author__ = 'sjp23'
@@ -31,20 +30,15 @@ def get_filesets():
        :return: A list of filesets that are marked as tape storage only.
        :rtype: List[string]
     """
-    # open download config - list os storage pots with logical paths
+    # make opener
+    opener = urllib2.build_opener()
 
-    response = requests.get(ON_TAPE_URL)
-    if response.status_code != 200:
-        logging.error("Cannot find url: {}".format(ON_TAPE_URL))
-        raise Exception
-    else:
-        filesets = response.text.split("\n")
-    # get the filesets from the splitstring
-    ret_filesets = []
-    for f in filesets:
-        if len(f) > 0:
-            ret_filesets.append(f.split()[2].strip())
-    return ret_filesets
+    # open download config - list os storage pots with logical paths
+    f = opener.open(ON_TAPE_URL)
+
+    filesets = f.readlines()
+    filesets = map(lambda x: x.split()[2].strip(), filesets)
+    return filesets
 
 def run():
     """Function picked up by django-extensions. Runs the scan for matching filesets.
@@ -53,15 +47,14 @@ def run():
        :return: None
     """
 
-    setup_logging(__name__)
-
     # First of all check if the process is running - if it is then don't start running again
     try:
         lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
         n_processes = 0
         for l in lines:
-            if "move_files_to_nla" in l:
-                logging.error("Process already running, exiting")
+            if "move_files_to_nla" in l and not "/bin/sh" in l:
+                print l
+                print "Process already running, exiting"
                 n_processes += 1
     except:
         n_processes = 1
@@ -71,15 +64,18 @@ def run():
         filesets = get_filesets()
         for fs in filesets:
             for directory, dirs, files in os.walk(fs):
-                for f in files:
+                for f in files:                    
                     path = os.path.join(directory, f)
+                    try:
+                        if os.path.islink(path):
+                            print "Ignore Link:", path
+                            continue
+                        if os.path.getsize(path) < MIN_FILE_SIZE:
+                            print "Ignore Small:", path
+                            continue
 
-                    if os.path.islink(path):
-                        logging.info("Ignore Link:", path)
-                        continue
-                    if os.path.getsize(path) < MIN_FILE_SIZE:
-                        logging.info("Ignore Small:", path)
-                        continue
+                        print "Adding ", path
+                        TapeFile.add(path, os.path.getsize(path))
+                    except:
+                        print "Could not add ", path
 
-                    logging.info("Adding ", path)
-                    TapeFile.add(path, os.path.getsize(path))

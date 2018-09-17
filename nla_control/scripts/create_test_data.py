@@ -39,7 +39,7 @@ def run():
     results = FileSet.objects.filter(logical_path = logicalpath)
     if len(results) == 0:
         # unlink if path exists, but logical path not in database
-        print(os.path.islink(logicalpath))
+        print os.path.islink(logicalpath)
         if os.path.islink(logicalpath):
             os.unlink(logicalpath)
         # now create fileset to hold ukmo-mslp data

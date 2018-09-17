@@ -90,6 +90,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# IMPORTANT: CookieStorage (and hence FallbackStorage, which is the default) interacts
+#            badly with Chrome's prefetching, causing messages to be rendered twice
+#            or not at all...!
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+
 # Internationalization
 LANGUAGE_CODE = 'en-gb'
 TIME_ZONE = 'UTC'
@@ -139,5 +145,6 @@ ON_TAPE_URL = CEDA_ARCAPP_BASE+'fileset/primary_on_tape'
 # host of storage-D retrieval
 SD_HOST = 'ceda_sd-retrieval.fds.rl.ac.uk'
 MIN_FILE_SIZE = 30 * 1024 * 1024 # (30 Mb)
-TEST_VERSION = False
+
 CHKSUMSDIR = "/datacentre/stats/storaged/chksums"
+

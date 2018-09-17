@@ -9,9 +9,7 @@ import os
 import datetime
 import subprocess
 import sys
-from nla_site.settings import *
-from nla_control.scripts.logging import setup_logging
-import logging
+from nla_control.settings import *
 
 # load storage paths to do path translation to from logical to storage paths.
 TapeFile.load_storage_paths()
@@ -58,11 +56,9 @@ def run(*args):
                       message with each of the filenames.
         """
 
-    setup_logging(__name__)
 
     files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
-    logging.info("Number of UNVERIFIED files: " + str(len(files)))
-    sys.exit()
+    print "Number of UNVERIFIED files: " + str(len(files))
 
     if "verify_now" in args:
         verify_now = True
@@ -111,7 +107,7 @@ def run(*args):
 
         # if there are no log files then go to next file
         if len(restore_log_files) == 0:
-            logging.info("Restore log files not found: " + str(restore_log_files))
+       	    print ("Restore log files not found: " + str(restore_log_files))
             continue
 
         # A problem here is that there may be more than one restore_log file for each file_set
@@ -119,7 +115,7 @@ def run(*args):
         # To account for this we do the following:
         # 1. sort the restore log files that match the glob pattern on the date embedded in their filename
         # 2. step through the log files, most recent first
-        # 3. If we find the file is already verified then we exit
+        # 3. If we find the file then we exit is already verified then we exit
         restore_log_files.sort()
         file_found = False
 
@@ -128,6 +124,9 @@ def run(*args):
             for line in open(restore_log):
                 # get the checksum and filename
                 strip_line = line.strip().split()
+                if len(strip_line) < 2:
+                    print ("Could not read line in restore log file correctly {} {}".format(line, restore_log))
+                    continue
                 checksum = strip_line[0]
                 filename = strip_line[1]
                 # if the filename matches the required filename
@@ -141,7 +140,6 @@ def run(*args):
                     # increment the number of verified files and indicate that the file is found
                     num_verified_files += 1
                     file_found = True
-                    logging.info("Verified file: " + f.logical_path)
                 if file_found:
                     break
             if file_found:

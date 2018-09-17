@@ -55,7 +55,7 @@ port = 7456
 fileDownloadCount = 100000 # Set an arbitrary maximum number of files in a single retrieval request
 timer = None
 badFiles = []
-
+    
 def usage():
     sys.stderr.write( """Usage:
     sd_get_emulator [ -v ] [ -l logfile ] [ -p port ] -f sourcefile  -r restoredirectory
@@ -66,7 +66,7 @@ def downloadFromFilelist( sourceFileList ):
 
     chosenFiles = []
     f = open( sourceFileList, 'r' )
-
+    
     for line in f:
         line = line.rstrip('\n')
         logger.debug('Read filename %s from source file %s'%(line,sourceFileList) )
@@ -81,10 +81,10 @@ if __name__ == '__main__':
     try:
         opts, args = getopt.getopt( sys.argv[1:], 'vf:d:r:l:h:p:t:' )
     except getopt.GetoptError,err:
-        print(str(err))
+        print str(err)
         usage()
         sys.exit( 1 )
-
+        
     for o, a in opts:
         if o == '-v':
             logLevel = logging.DEBUG
@@ -116,8 +116,9 @@ if __name__ == '__main__':
         sys.stderr.write( "Must provide a source file list\n" )
         usage()
         sys.exit( 1 )
-
+        
     if len(badFiles) > 0:
         sys.stderr.write( "Could not download the following files:\n" )
         for f in badFiles:
             sys.stderr.write( '%s\n'%(f) )
+

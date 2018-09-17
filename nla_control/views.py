@@ -4,9 +4,7 @@ from nla_control.models import *
 from django.shortcuts import redirect, render_to_response, get_object_or_404
 import json
 import datetime
-import requests
 from django.views.generic import View
-from nla_site.settings import CEDA_DOWNLOAD_CONF
 
 class RequestView(View):
     """:rest-api
@@ -669,12 +667,9 @@ class TapeFileView(View):
 
         # load tape file mappings if spot is true
         if spot.lower() == "true":
-            # build a mapping of filenames to spots
-            response = requests.get(CEDA_DOWNLOAD_CONF)
-            if response.status_code != 200:
-                raise Exception("Cannot find url: {}".format(CEDA_DOWNLOAD_CONF))
-            else:
-                page = response.text.split("\n")
+            opener = urllib2.build_opener()
+
+            page = opener.open(CEDA_DOWNLOAD_CONF)
             fileset_logical_path_map = {}
 
             # make a dictionary that maps logical paths to spot names
@@ -714,16 +709,15 @@ class TapeFileView(View):
 
 
 def unverified_spots(request):
-    """Get a list of unverified spots, in a similar manner as the "get" method above but just returning a
+    """Get a list of unverified spots, in a similar manner as the "get" method above but just returning a 
        text file that can be more easily processed"""
     # get a list of unverified files
     unv_files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
+
     # build a mapping of filenames to spots
-    response = requests.get(CEDA_DOWNLOAD_CONF)
-    if response.status_code != 200:
-        raise Exception("Cannot find url: {}".format(CEDA_DOWNLOAD_CONF))
-    else:
-        page = response.text.split("\n")
+    opener = urllib2.build_opener()
+
+    page = opener.open(CEDA_DOWNLOAD_CONF)
     fileset_logical_path_map = {}
 
     # make a dictionary that maps logical paths to spot names
@@ -740,7 +734,7 @@ def unverified_spots(request):
     # loop over the files
     for f in unv_files:
         lpath = f.logical_path
-        for i in range(0, 3):
+        for i in range(0,3):
             # get the directory name
             head, tail = os.path.split(lpath)
             if head in fileset_logical_path_map:

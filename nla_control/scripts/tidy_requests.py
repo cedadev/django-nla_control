@@ -13,11 +13,9 @@
 from nla_control.models import TapeFile, TapeRequest
 import datetime
 from pytz import utc
-from nla_site.settings import *
-from nla_control.scripts.process_requests import update_requests
+from nla_control.settings import *
+from process_requests import update_requests
 from ceda_elasticsearch_tools.core.updater import ElasticsearchQuery, ElasticsearchUpdater
-from nla_control.scripts.logging import setup_logging
-import logging
 
 __author__ = 'sjp23'
 
@@ -48,34 +46,34 @@ def tidy_requests():
     now = datetime.datetime.now(utc)
     tape_requests = TapeRequest.objects.filter(retention__lt=now)
 
-    logging.info("Updating tape requests")
+    print "Updating tape requests"
     for tr in tape_requests:
-        logging.info(tr)
+        print tr
         request_files = tr.request_files.split()
         present_tape_files = TapeFile.objects.filter(logical_path__in=request_files)
         if len(present_tape_files) != 0:
             tr.files = present_tape_files.all()
             tr.save()
 
-    logging.info("Tidying tape requests: find tape requests...")
+    print "Tidying tape requests: find tape requests..."
     for tr in tape_requests:
         # make list of files to tidy
-        logging.info(tr)
+        print tr
         to_remove = []
 
         for f in tr.files.all():
             # Check if the file does not exist on the disk anymore - but only remove it if it is still in a restored state
             if not os.path.exists(f.logical_path):
                 if f.stage == TapeFile.RESTORED:
-                    logging.info("    File requests exists, but file is not on the disk. Removing file from NLA:", f.logical_path)
-                    f.delete()
+                    print "File requests exists, but file is not on the disk. Removing file from NLA:", f.logical_path
+                    #f.delete()
                 continue
             file_mod = datetime.datetime.fromtimestamp(os.path.getmtime(f.logical_path), utc)
             if f.verified:
                 tr_f_mod = f.verified.replace(tzinfo=file_mod.tzinfo)
                 if not os.path.islink(f.logical_path) and file_mod > tr_f_mod:
-                    logging.info("    File has been modified after the time it was verified. Leave it alone.")
-                    logging.info("    Leaving file, but resetting as unverified %s" % f)
+                    print "File has been modified after the time it was verified. Leave it alone."
+                    print "Leaving file, but resetting as unverified %s" % f
                     f.verified = None
                     f.stage = TapeFile.UNVERIFIED
                     f.restore_disk = None
@@ -89,7 +87,7 @@ def tidy_requests():
                 if tape_request == tr:
                     continue
                 if (f.stage == TapeFile.RESTORED or f.stage == TapeFile.RESTORING) and f in tape_request.files.all():
-                    logging.info("    Other request has requested this file.", f.logical_path)
+                    print "Other request has requested this file.", f.logical_path
                     in_other_request = True
                     break
 
@@ -99,25 +97,35 @@ def tidy_requests():
             # if we get here then the file exists, has not been modified since checked and is not in another request
             to_remove.append(f)
 
-        logging.info("Removing %s files from restored area:" % len(to_remove))
+        print "Removing %s files from restored area:" % len(to_remove)
         # list of files to modify in elastic search
         removed_files = []
         for f in to_remove:
-            logging.info("     -  %s" % f)
+            print "     -  %s" % f
             logical_dir = os.path.dirname(f.logical_path)
             sign_post = os.path.join(logical_dir, "00FILES_ON_TAPE")
-            if not os.path.exists(sign_post):
-                if not TEST_VERSION:
-                    os.symlink("/badc/ARCHIVE_INFO/FILES_ON_TAPE.txt", sign_post)
+            try:
+                if not os.path.exists(sign_post):
+                    if not TEST_VERSION:
+                        os.symlink("/badc/ARCHIVE_INFO/FILES_ON_TAPE.txt", sign_post)
+            except Exception as e:
+                print "Could not create signpost: ", sign_post
             # Commented out deletion of files for testing safety
             if f.stage == TapeFile.RESTORED:
-                # remove link and datafile in restore cache
-                os.unlink(os.readlink(f.logical_path))
-                os.unlink(f.logical_path)
+                try:
+                    # remove link and datafile in restore cache
+                    os.unlink(os.readlink(f.logical_path))
+                    os.unlink(f.logical_path)
+                    f.stage = TapeFile.ONTAPE
+                except Exception as e:
+                    print "Could not remove from restored area: ", f.logical_path
             else:
                 # removing for the first time or deleted or unverified
-                os.unlink(f.logical_path)
-            f.stage = TapeFile.ONTAPE
+                try:
+                    os.unlink(f.logical_path)
+                    f.stage = TapeFile.ONTAPE
+                except Exception as e:
+                    print "Could not remove from archive: ", f.logical_path
             # get the restore disk and update
             if f.restore_disk:
                 f.restore_disk.update()
@@ -128,7 +136,7 @@ def tidy_requests():
             # add to list of files to be altered in Elastic Search
             removed_files.append(f.logical_path)
 
-        logging.info("Setting status of files in Elastic Search to not on disk")
+        print "Setting status of files in Elastic Search to not on disk"
         try:
             # Get params and query
             params, query = ElasticsearchQuery.ceda_fbs()
@@ -137,15 +145,17 @@ def tidy_requests():
                                  host="jasmin-es1.ceda.ac.uk",
                                  port=9200
                                  ).update_location(file_list=removed_files, params=params, search_query=query, on_disk=False)
-            logging.info("Updated Elastic Search Index ", restored_files)
+            print "Updated Elastic Search index for files ",
+            for f in removed_files:
+                print " - " + str(f)
         except Exception as e:
-            logging.error("Failed updating Elastic Search Index ", e, restored_files)
+            print "Failed updating Elastic Search Index ",
+            print e, removed_files
 
-        logging.info("Remove request %s" % tr)
+        print "Remove request %s" % tr
         tr.delete()
 
 
 def run():
     """Entry point for the Django script run via ``./manage.py runscript``"""
-    setup_logging(__name__)
     tidy_requests()
