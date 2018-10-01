@@ -94,6 +94,12 @@ def run(*args):
     #
     num_verified_files = 0
 
+    # missing restore log files (for spots)
+    missing_log_files = []
+
+    # log files with errors
+    error_log_files = []
+
     for f in files:
         spot_logical_path, spot_name = f.spotname()
         file_path = f.logical_path
@@ -107,7 +113,9 @@ def run(*args):
 
         # if there are no log files then go to next file
         if len(restore_log_files) == 0:
-       	    print ("Restore log files not found: " + str(restore_log_files))
+            if not spot_name in missing_log_files:
+                missing_log_files.append(spot_name)
+       	    #print ("Restore log files not found for spot: " + str(spot_name))
             continue
 
         # A problem here is that there may be more than one restore_log file for each file_set
@@ -125,7 +133,9 @@ def run(*args):
                 # get the checksum and filename
                 strip_line = line.strip().split()
                 if len(strip_line) < 2:
-                    print ("Could not read line in restore log file correctly {} {}".format(line, restore_log))
+                    if not spot_name in error_log_files:
+                        error_log_files.append(spot_name)
+#                    print ("Could not read line in restore log file correctly {} {}".format(line, restore_log))
                     continue
                 checksum = strip_line[0]
                 filename = strip_line[1]
@@ -150,3 +160,13 @@ def run(*args):
         tape_request.delete()
     else:
         tape_request.save()
+
+    # print the errors:
+    print ("Missing restore log files")
+    for mf in missing_log_files:
+        print "    {}".format(mf)
+
+    print
+    print ("Errors in log files")
+    for ef in error_log_files:
+        print "    {}".format(ef)

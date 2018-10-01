@@ -113,26 +113,32 @@ def tidy_requests():
             # Commented out deletion of files for testing safety
             if f.stage == TapeFile.RESTORED:
                 try:
+                    f.stage = TapeFile.ONTAPE
+                    # get the restore disk and update
+                    if f.restore_disk:
+                        f.restore_disk.update()
+                    # set no restore disk
+                    f.restore_disk = None
+                    f.save()
                     # remove link and datafile in restore cache
                     os.unlink(os.readlink(f.logical_path))
                     os.unlink(f.logical_path)
-                    f.stage = TapeFile.ONTAPE
                 except Exception as e:
                     print "Could not remove from restored area: ", f.logical_path
             else:
                 # removing for the first time or deleted or unverified
                 try:
-                    os.unlink(f.logical_path)
                     f.stage = TapeFile.ONTAPE
+                    # get the restore disk and update
+                    if f.restore_disk:
+                        f.restore_disk.update()
+                    # set no restore disk
+                    f.restore_disk = None
+                    f.save()
+                    os.unlink(f.logical_path)
                 except Exception as e:
                     print "Could not remove from archive: ", f.logical_path
-            # get the restore disk and update
-            if f.restore_disk:
-                f.restore_disk.update()
 
-            # set no restore disk
-            f.restore_disk = None
-            f.save()
             # add to list of files to be altered in Elastic Search
             removed_files.append(f.logical_path)
 

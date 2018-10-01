@@ -144,7 +144,7 @@ def fix_missing_files():
                 f.save()
 
 
-def fix_links():
+def fix_restore_links():
     """Fix any files that are stuck in RESTORING mode where the file actually exists in the restore area
        but the symbolic link does not exist.  Fix by creating a symbolic link and setting the stage to RESTORED
     """
@@ -154,26 +154,35 @@ def fix_links():
     tape_files = TapeFile.objects.filter(Q(stage=TapeFile.RESTORING) | Q(stage=TapeFile.RESTORED))
 
     for tf in tape_files.all():
-        if not os.path.exists(tf.logical_path) and tf.restore_disk:
-            # build the restored spot path
-            spot_logical_path, spot_name = tf.spotname()
-            restore_path = tf.restore_disk.mountpoint+tf.logical_path.replace(spot_logical_path, "/archive/%s" % spot_name)
-            # create the link if the restore path exists
-            if os.path.exists(restore_path):
-                try:
-                    os.symlink(restore_path, tf.logical_path)
-                    tf.stage = TapeFile.RESTORED
+        if not os.path.exists(tf.logical_path):
+            if tf.restore_disk:
+                # build the restored spot path
+                spot_logical_path, spot_name = tf.spotname()
+                restore_path = tf.restore_disk.mountpoint+tf.logical_path.replace(spot_logical_path, "/archive/%s" % spot_name)
+                # create the link if the restore path exists
+                if os.path.exists(restore_path):
+                    try:
+                        os.symlink(restore_path, tf.logical_path)
+                        tf.stage = TapeFile.RESTORED
+                        tf.save()
+                        print "LINKED: " + tf.logical_path + " & " + restore_path
+                    except:
+                        print "FAILED TO LINK: " + tf.logical_path + " & " + restore_path
+                else:
+                    print "RESTORE PATH DOES NOT EXIST: " + tf.logical_path + " & " + restore_path
+                    if os.path.exists(tf.logical_path):
+                        os.unlink(tf.logical_path)
+                    tf.stage = TapeFile.ONTAPE
+                    tf.restore_disk = None
                     tf.save()
-                    print "LINKED: " + tf.logical_path + " & " + restore_path
-                except:
-                    print "FAILED TO LINK: " + tf.logical_path + " & " + restore_path
             else:
-                print "RESTORE PATH DOES NOT EXIST: " + tf.logical_path + " & " + restore_path
-                if os.path.exists(tf.logical_path):
+                print "LOGICAL PATH DOES NOT EXIST: " + tf.logical_path
+                if os.path.islink(tf.logical_path):
                     os.unlink(tf.logical_path)
                 tf.stage = TapeFile.ONTAPE
+                tf.restore_disk = None
                 tf.save()
-
+            
 
 def create_request_for_on_disk_files():
     """Create a TapeRequest containing all the files that are currently listed as being ONDISK, but are not part of
@@ -287,6 +296,9 @@ def reset_files_no_verify_date():
             t.stage = TapeFile.UNVERIFIED
             t.save()
 
+def get_tape_stages():
+    return ["ONTAPE", "RESTORING", "ONDISK", "UNVERIFIED", "", "RESTORED"]
+
 def reset_removed_files():
     """From a list of logical paths in the file /home/badc/missing_files.txt, find the
        files that do not exist in the NLA but do on the tape and restore the status of those
@@ -320,26 +332,36 @@ def reset_removed_files():
             else:
                 spot_files[spot_name] = [f]
 
-    print(spot_files)
-    stages = ["ONTAPE", "RESTORING", "ONDISK", "UNVERIFIED", "RESTORED"]
+    stages = get_tape_stages()
 
     # for each spot run sd_ls on the spot name to get the list of files in the spot back
     for spot_name in spot_files:
+        print("Working on spot: ", spot_name, )
         sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+        print("... sd_ls completed")
         output = subprocess.check_output(sd_cmd)
         out_lines = output.split("\n")
         for out_item in out_lines:
             out_file = out_item.split()
             if len(out_file) == 11:
                 file_name = os.path.basename(out_file[10])
-                size = out_file[1]
+                size = out_file[3]
                 for f in spot_files[spot_name]:
                     if file_name in f:
                         # see if this record exists as a TapeFile
                         try:
-                            tf = TapeFile.objects.get(logical_path = f)
+                            tf = TapeFile.objects.filter(logical_path = f).order_by('pk')
+                            if tf.count() > 1:
+                                # more than one TapeFile with logical path due to earlier coding error
+                                # delete the others
+                                print("Removing duplicate file for: ", f)
+                                for df in tf[1:]:
+                                    df.delete()
+                                
+                            tf = tf[0]
                             status = stages[tf.stage]
-                        except:
+                        except Exception as e:
+                            print(e)
                             status = "UNKNOWN"
 
                         # recreate the TapeFile record if its status is UNKNOWN
@@ -351,11 +373,72 @@ def reset_removed_files():
     fh.close()
         
 
+def reset_all_removed_files():
+    """Reset all the files that occur on the tape (via sd_ls) but have been removed from the NLA database"""
+    response = requests.get(ON_TAPE_URL)
+    if response.status_code != 200:
+        raise Exception("Cannot find url: {}".format(ON_TAPE_URL))
+    else:
+	page = response.text.split("\n")
+
+    print("Number of spots: {}".format(len(page)))
+    stages = get_tape_stages()
+
+    for line in page:
+        line = line.strip()
+        if line == '':
+            continue
+        spot_name, spot_path, logical_path = line.split()
+
+        print("Checking: ", spot_name)
+        try:
+            sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+            output = subprocess.check_output(sd_cmd)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print ("Failed", str(e))
+            continue
+        out_lines = output.split("\n")
+        file_list = []
+        size_list = []
+        for out_item in out_lines:
+            out_file = out_item.split()
+            if len(out_file) == 11:
+                spot_file_name = out_file[10]
+                spot_path_cmpts = spot_path.split("/")
+                local_spot_path = "/" + spot_path_cmpts[-2] + "/" + spot_path_cmpts[-1]
+                logical_file_name = spot_file_name.replace(local_spot_path, logical_path)
+                size = int(out_file[3])
+                if size > MIN_FILE_SIZE:
+                    file_list.append(logical_file_name)
+                    size_list.append(size)
+
+	# get a list of files in the NLA that are also in the file_list
+        tfs = TapeFile.objects.filter(logical_path__in = file_list)
+        if tfs.count() < len(file_list):
+            print ("Missing {} files".format(len(file_list) - tfs.count()))
+            # list of files in the db
+            db_file_list = [tf.logical_path for tf in tfs]
+            for f in range(0, len(file_list)):
+                fname = file_list[f]
+                size = size_list[f]
+                if not fname in db_file_list:
+                    try:
+                        tf = TapeFile(logical_path=fname, size=int(size), stage=TapeFile.UNVERIFIED)
+                        tf.save()
+                        print ("Re-adding file: {}".format(fname))
+                    except KeyboardInterrupt:
+                        raise
+                    except Exception as e:
+                        print("Exception: ", str(e))
+                
+
 def run(*args):
     """Entry point for the Django script run via ``./manage.py runscript``
    Arguments (passed via --script-args) will run the corresponding function
    Available fixes:
-       fix_links
+       fix_restore_links
        clear_slots
        set_restoring_files_to_ontape
        reset_stuck_taperequests
@@ -366,6 +449,7 @@ def run(*args):
        deactivate_all_taperequests
        reset_files_no_verify_date
        reset_removed_files
+       reset_all_removed_files
     """
 
     if len(args) == 0:

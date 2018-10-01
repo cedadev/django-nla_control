@@ -252,6 +252,20 @@ def send_end_email(slot):
     send_mail(subject, msg, fromaddr, toaddrs, fail_silently=False)
 
 
+def get_spot_contents(spot_name):
+    """Get a list of the files in the spot `spot_name`"""
+    sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+    output = subprocess.check_output(sd_cmd)
+    out_lines = output.split("\n")
+    spot_files = []
+    for out_item in out_lines:
+        out_file = out_item.split()
+        if len(out_file) == 11:
+            file_name = os.path.basename(out_file[10])
+            spot_files.append(file_name)
+    return spot_files
+    
+
 def create_retrieve_listing(slot, target_disk):
     """Create a text file (``file_listing_filename``) containing the names of the files to retrieve from StorageD.
     This text file is saved to the mountpoint of the restore disk that has been allocated for this retrieval by
@@ -273,18 +287,24 @@ def create_retrieve_listing(slot, target_disk):
     file_listing = open(file_listing_filename, "w")
 
     retrieved_to_file_map = {}
+    spot_list = {}
 
     for f in files:
         spot_logical_path, spot_name = f.spotname()
+        # get a list of files in the spot if not already got
+        if spot_name not in spot_list:
+            spot_list[spot_name] = get_spot_contents(spot_name)
         if TEST_VERSION:
             to_retrieve = f.logical_path
         else:
             to_retrieve = f.logical_path.replace(spot_logical_path, "/archive/%s" % spot_name)
-        retrieved_to_file_map[to_retrieve] = f
-        file_listing.write(to_retrieve + "\n")
-        f.stage = TapeFile.RESTORING
-        f.restore_disk = target_disk
-        f.save()
+        # check it's in the spot on sd
+        if to_retrieve in spot_list[spot_name]:
+            retrieved_to_file_map[to_retrieve] = f
+            file_listing.write(to_retrieve + "\n")
+            f.stage = TapeFile.RESTORING
+            f.restore_disk = target_disk
+            f.save()
     file_listing.close()
     return file_listing_filename, retrieved_to_file_map
 
@@ -331,7 +351,6 @@ def start_sd_get(slot, file_listing_filename, target_disk):
     slot.pid = p.pid
     slot.save()
     return p, log_file_name
-
 
 def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
     """
@@ -470,22 +489,32 @@ def start_retrieval(slot):
     # create the retrieve listing file and get the mapping between the retrieve listing and the spot filename
     file_listing_filename, retrieved_to_file_map = create_retrieve_listing(slot, target_disk)
 
-    # send start notification email
-    send_start_email(slot)
+    # check whether any files actually need to be downloaded
+    if len(retrieved_to_file_map) != 0:
 
-    # start the sd_get_process
-    p, log_file_name = start_sd_get(slot, file_listing_filename, target_disk)
+        print "  Start request for %s on slot %s" % (slot.tape_request, slot.pk)
+        # send start notification email
+        send_start_email(slot)
 
-    wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map)
+        # start the sd_get_process
+        p, log_file_name = start_sd_get(slot, file_listing_filename, target_disk)
 
-    # request ended - send ended email
-    send_end_email(slot)
+        wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map)
 
-    # if got all the files then mark slot as empty
-    if len(slot.tape_request.files.filter(stage=TapeFile.RESTORING)) == 0:
-        complete_request(slot)
+        # request ended - send ended email
+        send_end_email(slot)
+
+        # if got all the files then mark slot as empty
+        if len(slot.tape_request.files.filter(stage=TapeFile.RESTORING)) == 0:
+            complete_request(slot)
+        else:
+            redo_request(slot)
     else:
-        redo_request(slot)
+        # Deactivate request and make slot available to others
+        slot.tape_request.active_request = False
+        slot.tape_request.save()
+        slot.tape_request = None
+        slot.save()
 
 
 def redo_request(slot):
@@ -621,7 +650,6 @@ def run():
         else:
             # load storage paths to do path translation to from logical to storage paths.
             TapeFile.load_storage_paths()
-            print "  Start request for %s on slot %s" % (slot.tape_request, slot.pk)
             start_retrieval(slot)
             break
 
