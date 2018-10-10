@@ -635,7 +635,7 @@ def run():
 
     # update the requests to active / not active
     print "Update requests"
-#    update_requests()
+    update_requests()
 
     # make right number of slots
     print "Adjust slots"
