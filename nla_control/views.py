@@ -214,6 +214,8 @@ class RequestView(View):
             file_reqs = TapeFile.objects.filter(logical_path__in=data["request_files"].split())
         elif "patterns" in data:
             file_reqs = TapeFile.objects.filter(logical_path__contains=data["patterns"])
+        else:
+            file_reqs = []
 
         # can now add up the file_requests
         for f in file_reqs:
