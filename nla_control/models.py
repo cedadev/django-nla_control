@@ -78,10 +78,10 @@ class TapeFile(models.Model):
     __CHOICES = ((ONTAPE, 'On tape'), (RESTORING, 'Restoring'),
                  (ONDISK, 'On Disk'), (UNVERIFIED, 'Unverified'), (RESTORED, 'Restored'))
 
-    logical_path = models.CharField(max_length=2024, help_text='logical path of archived files e.g. /badc/acsoe/file10.dat')
+    logical_path = models.CharField(max_length=2024, help_text='logical path of archived files e.g. /badc/acsoe/file10.dat', db_index=True)
     size = FileSizeField(help_text='size of file in bytes')
     verified = models.DateTimeField(blank=True, null=True, help_text="Checked tape copy is same as disk copy")
-    stage = models.IntegerField(choices=__CHOICES)
+    stage = models.IntegerField(choices=__CHOICES, db_index=True)
 
     # which restore disk is the restored file on?
     restore_disk = models.ForeignKey(RestoreDisk, blank=True, null=True)
@@ -252,7 +252,7 @@ class TapeRequest(models.Model):
     label = models.CharField(blank=True, null=True, max_length=2024,
                                            help_text="Human readable label for request")
     quota = models.ForeignKey(Quota, help_text="User Quota for request")
-    retention = models.DateTimeField(blank=True, null=True)
+    retention = models.DateTimeField(blank=True, null=True, db_index=True)
     request_date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     active_request = models.BooleanField(default=False)
     storaged_request_start = models.DateTimeField(blank=True, null=True)
