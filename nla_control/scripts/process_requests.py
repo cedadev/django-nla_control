@@ -298,8 +298,10 @@ def create_retrieve_listing(slot, target_disk):
             to_retrieve = f.logical_path
         else:
             to_retrieve = f.logical_path.replace(spot_logical_path, "/archive/%s" % spot_name)
+
+        to_check = os.path.basename(to_retrieve)
         # check it's in the spot on sd
-        if to_retrieve in spot_list[spot_name]:
+        if to_check in spot_list[spot_name]:
             retrieved_to_file_map[to_retrieve] = f
             file_listing.write(to_retrieve + "\n")
             f.stage = TapeFile.RESTORING
@@ -330,27 +332,30 @@ def start_sd_get(slot, file_listing_filename, target_disk):
         os.unlink(log_file_name)
 
     # build the arg string for sd_get
-    sd_get_args = " -v -l % s -h % s -r % s -f % s" % (log_file_name, SD_HOST, target_disk.mountpoint, file_listing_filename)
+    sd_get_args = ["-v", "-l", log_file_name, "-h", SD_HOST, "-r", target_disk.mountpoint, "-f", file_listing_filename]
 
     if TEST_VERSION:
         # get the current python running via sys.executable and the sd_get_emulator command from
         # the current PROJECT_DIR / BASE_DIR
         pth = os.path.dirname(nla_control.__file__)
-        sd_get_cmd = sys.executable + " " + pth + "/bin/sd_get_emulator " + sd_get_args
+        sd_get_cmd = [sys.executable, pth, "/bin/sd_get_emulator"]
+        sd_get_cmd.extend(sd_get_args)
     else:
         # this is a bit hacky but sd_get uses the system python2.7, rather than the venv one
-        sd_get_cmd = "/usr/bin/python2.7" + " /usr/bin/sd_get " + sd_get_args
+        sd_get_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_get"]
+        sd_get_cmd.extend(sd_get_args)
 
     # mark request as started
     slot.tape_request.storaged_request_start = datetime.datetime.utcnow()
     slot.tape_request.save()
 
     # start storage-D process and record pid and host
-    p = subprocess.Popen(sd_get_cmd, shell=True)
+    p = subprocess.Popen(sd_get_cmd)
     slot.host_ip = socket.gethostbyname(socket.gethostname())
     slot.pid = p.pid
     slot.save()
     return p, log_file_name
+
 
 def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
     """
@@ -417,16 +422,18 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
                 restored_files.append(f.logical_path)
         # modify the restored files in elastic search
         try:
-            # Get params and query
-            params, query = ElasticsearchQuery.ceda_fbs()
-            # Open connection to index and update files
-            ElasticsearchUpdater(index="ceda-level-1",
-                                 host="jasmin-es1.ceda.ac.uk",
-                                 port=9200
-                                 ).update_location(file_list=restored_files, params=params, search_query=query, on_disk=True)
-            print "Updated Elastic Search index for files ",
-            for f in restored_files:
-                print " - " + str(f)            
+            if len(restored_files) > 0:
+                # Get params and query
+                params, query = ElasticsearchQuery.ceda_fbs()
+                # Open connection to index and update files
+                ElasticsearchUpdater(index="ceda-level-1",
+                                     host="jasmin-es1.ceda.ac.uk",
+                                     port=9200
+                                     ).update_location(file_list=restored_files, params=params, search_query=query, on_disk=True)
+
+                print "Updated Elastic Search index for files ",
+                for f in restored_files:
+                    print " - " + str(f)
         except Exception as e:
             print "Failed updating Elastic Search Index ",
             print e, restored_files
@@ -477,14 +484,14 @@ def start_retrieval(slot):
     if len(files) == 0:
         slot.tape_request.storaged_request_start = datetime.datetime.utcnow()
         complete_request(slot)
-        return
+        return False
 
     # get the next free restore disk
     target_disk = get_restore_disk(slot)
     # error check - no room on the disk returns None
     if target_disk is None:
         print "ERROR: No RestoreDisks exist with enough space to hold the request"
-        return
+        return False
 
     # create the retrieve listing file and get the mapping between the retrieve listing and the spot filename
     file_listing_filename, retrieved_to_file_map = create_retrieve_listing(slot, target_disk)
@@ -509,12 +516,14 @@ def start_retrieval(slot):
             complete_request(slot)
         else:
             redo_request(slot)
+        return True
     else:
         # Deactivate request and make slot available to others
         slot.tape_request.active_request = False
         slot.tape_request.save()
         slot.tape_request = None
         slot.save()
+        return False
 
 
 def redo_request(slot):
@@ -616,7 +625,6 @@ def run():
         n_processes = 0
         for l in lines:
             if "process_requests" in l and not "/bin/sh" in l:
-                print l
                 n_processes += 1
     except:
 	n_processes = 1
@@ -627,7 +635,7 @@ def run():
 
     # update the requests to active / not active
     print "Update requests"
-    update_requests()
+#    update_requests()
 
     # make right number of slots
     print "Adjust slots"
@@ -649,8 +657,9 @@ def run():
             continue
         else:
             # load storage paths to do path translation to from logical to storage paths.
+            print "  Process slot %s" % slot.pk
             TapeFile.load_storage_paths()
-            start_retrieval(slot)
-            break
+            if start_retrieval(slot):
+               break
 
     print "End retrieval run."
