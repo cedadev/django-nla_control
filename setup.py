@@ -13,7 +13,7 @@ setup(
     packages=['nla_control'],
     install_requires=[
         'appdirs',
-        'django==1.11.1',
+        'django==1.11.15',
         'django-sizefield==0.9.1',
         'django-extensions==1.7.9',
         'django-multiselectfield==0.1.7',

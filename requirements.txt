@@ -1,7 +1,7 @@
 appdirs==1.4.3
 certifi==2017.11.5
 chardet==3.0.4
-Django==1.11.1
+Django==1.11.15
 django-extensions==1.7.9
 django-multiselectfield==0.1.7
 django-sizefield==0.9.1
