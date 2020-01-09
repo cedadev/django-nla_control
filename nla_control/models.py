@@ -1,13 +1,13 @@
 from django.db import models
 import fnmatch
-import urllib2
+import requests
 from django.db.models import Sum
 from django.db.models import Q
 
 from sizefield.models import FileSizeField
 from sizefield.utils import filesizeformat
 
-from settings import *
+from nla_site.settings import *
 
 class RestoreDisk(models.Model):
     """Allocated area(s) of disk(s) to hold restored files.  Restore will find a space on one
@@ -61,7 +61,7 @@ class TapeFile(models.Model):
 
           - **A**: RESTORING (1)
 
-          - **R**: RESTORED (4)
+          - **R**: RESTORED (5)
 
        :var models.ForeignKey restore_disk: A reference to the RestoreDisk where the file has been restored to
     """
@@ -84,17 +84,14 @@ class TapeFile(models.Model):
     stage = models.IntegerField(choices=__CHOICES, db_index=True)
 
     # which restore disk is the restored file on?
-    restore_disk = models.ForeignKey(RestoreDisk, blank=True, null=True)
+    restore_disk = models.ForeignKey(RestoreDisk, blank=True, null=True,
+                                     on_delete=models.CASCADE)
 
     @staticmethod
     def load_storage_paths():
         """Load the fileset logical paths to spotname mappings by retrieving the spotnames from a URL,
            finding the corresponding logical path for the spot and reformatiing them into a dictionary"""
-        # make opener with RAL proxy
-        #proxy_handler = urllib2.ProxyHandler({'http': 'http://wwwcache.rl.ac.uk:8080'})
-        opener = urllib2.build_opener()
-
-        page = opener.open(CEDA_DOWNLOAD_CONF)
+        page = requests.get(CEDA_DOWNLOAD_CONF)
         TapeFile.fileset_logical_path_map = {}
         TapeFile.fileset_logical_paths = []
 
@@ -110,7 +107,7 @@ class TapeFile(models.Model):
         # reverse sort the logical paths so that longer paths match first
         TapeFile.fileset_logical_paths.sort(reverse=True)
 
-        page = opener.open(STORAGE_PATHS_URL)
+        page = requests.get(STORAGE_PATHS_URL)
         TapeFile.fileset_storage_path_map = {}
 
         # make a dictionary that maps spot names to storage paths
@@ -157,7 +154,7 @@ class TapeFile(models.Model):
         """
         return os.path.dirname(self.storage_path())
 
-    def __unicode__(self): 
+    def __unicode__(self):
         return "%s (%s)" % (self.logical_path, self.stage)
 
     def match(self, pattern):
@@ -251,7 +248,8 @@ class TapeRequest(models.Model):
     # Requests for tape file restores
     label = models.CharField(blank=True, null=True, max_length=2024,
                                            help_text="Human readable label for request")
-    quota = models.ForeignKey(Quota, help_text="User Quota for request")
+    quota = models.ForeignKey(Quota, help_text="User Quota for request",
+                              on_delete=models.CASCADE)
     retention = models.DateTimeField(blank=True, null=True, db_index=True)
     request_date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     active_request = models.BooleanField(default=False)

@@ -264,7 +264,7 @@ def get_spot_contents(spot_name):
             file_name = os.path.basename(out_file[10])
             spot_files.append(file_name)
     return spot_files
-    
+
 
 def create_retrieve_listing(slot, target_disk):
     """Create a text file (``file_listing_filename``) containing the names of the files to retrieve from StorageD.
@@ -508,11 +508,10 @@ def start_retrieval(slot):
 
         wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map)
 
-        # request ended - send ended email
-        send_end_email(slot)
-
         # if got all the files then mark slot as empty
-        if len(slot.tape_request.files.filter(stage=TapeFile.RESTORING)) == 0:
+        if slot.tape_request.files.filter(stage=TapeFile.RESTORING).count() == 0:
+            # request ended - send ended email
+            send_end_email(slot)
             complete_request(slot)
         else:
             redo_request(slot)

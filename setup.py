@@ -9,19 +9,17 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nla_control',
-    version='0.4',
+    version='0.4.6',
     packages=['nla_control'],
     install_requires=[
         'appdirs',
-        'django==1.11.15',
-        'django-sizefield==0.9.1',
-        'django-extensions==1.7.9',
-        'django-multiselectfield==0.1.7',
-        'psycopg2',
-        'packaging',
+        'django==2.2.5',
+        'django-sizefield',
+        'django-extensions',
+        'django-multiselectfield',
+        'psycopg2-binary',
         'pyparsing',
         'pytz',
-        'six',
         'requests',
     ],
     include_package_data=True,
@@ -38,10 +36,8 @@ setup(
         'License :: OSI Approved :: BSD License', # example license
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        # Replace these appropriately if you are stuck on Python 2.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],

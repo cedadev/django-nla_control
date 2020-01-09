@@ -164,4 +164,16 @@ def tidy_requests():
 
 def run():
     """Entry point for the Django script run via ``./manage.py runscript``"""
+    # First of all check if the process is running - if it is then don't start running again
+    try:
+        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
+        n_processes = 0
+        for l in lines:
+            if "tidy_requests" in l and not "/bin/sh" in l:
+                print l
+                print "Process already running, exiting"
+                n_processes += 1
+    except:
+        n_processes = 1
+
     tidy_requests()

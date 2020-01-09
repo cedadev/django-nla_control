@@ -101,7 +101,6 @@ def fix_symbolic_links():
                         else:
                             f = f[0]
                         # link file to final archive location
-                        print local_restored_path, f.logical_path
                         if not os.path.exists(f.logical_path):
                             # os.path.exists returns false for broken links so delete the link
                             if os.path.islink(f.logical_path):
@@ -125,9 +124,7 @@ def fix_missing_files():
     for tr in tape_requests:
         # loop over the files which have been restored in the tape request
         for f in tr.files.filter(Q(stage=TapeFile.RESTORED) | Q(stage=TapeFile.RESTORING)):
-            if not os.path.exists(f.logical_path):# and os.path.lexists(f.logical_path):
-                print (f.logical_path, os.path.lexists(f.logical_path))
-                continue
+            if not os.path.exists(f.logical_path) and os.path.lexists(f.logical_path):
                 # unlink
                 print "Removing link to: " + f.logical_path
                 os.remove(f.logical_path)
@@ -182,7 +179,7 @@ def fix_restore_links():
                 tf.stage = TapeFile.ONTAPE
                 tf.restore_disk = None
                 tf.save()
-            
+
 
 def create_request_for_on_disk_files():
     """Create a TapeRequest containing all the files that are currently listed as being ONDISK, but are not part of
@@ -273,7 +270,7 @@ def clean_up_restore_disk():
                                 if tape_file.stage == TapeFile.ONTAPE:
                                     print ("Deleting " + str(fp))
                                     os.unlink(fp)
-                                
+
                         except:
                             pass
                 fh.close()
@@ -325,7 +322,7 @@ def reset_removed_files():
             except:
                 found = False
                 file_path = os.path.dirname(file_path)
-        
+
         if found:
             if spot_name in spot_files:
                 spot_files[spot_name].append(f)
@@ -357,7 +354,7 @@ def reset_removed_files():
                                 print("Removing duplicate file for: ", f)
                                 for df in tf[1:]:
                                     df.delete()
-                                
+
                             tf = tf[0]
                             status = stages[tf.stage]
                         except Exception as e:
@@ -371,7 +368,7 @@ def reset_removed_files():
                             print("Re-added file: ", f)
 
     fh.close()
-        
+
 
 def reset_all_removed_files():
     """Reset all the files that occur on the tape (via sd_ls) but have been removed from the NLA database"""
@@ -432,7 +429,7 @@ def reset_all_removed_files():
                         raise
                     except Exception as e:
                         print("Exception: ", str(e))
-                
+
 
 def run(*args):
     """Entry point for the Django script run via ``./manage.py runscript``
