@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>nla_client_lib.py &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nla_client_settings.py" href="nla_client_settings.html" />
+    <link rel="prev" title="nla.py" href="nla_client_src.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">NLA User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rest_api/rest_api.html">REST API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="nla_client.html">Near Line Archive client</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="nla_client_src.html">nla.py</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">nla_client_lib.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nla_client_settings.html">nla_client_settings.py</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="nla_client.html">Near Line Archive client</a> &raquo;</li>
+        
+      <li>nla_client_lib.py</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/nla_client/nla_client_lib.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-nla_client_lib">
+<span id="nla-client-lib-py"></span><h1>nla_client_lib.py<a class="headerlink" href="#module-nla_client_lib" title="Permalink to this headline">¶</a></h1>
+<p>nla_client_lib.py provides a wrapper to calls to the REST-style API which interfaces with the
+CEDA NLA system.  Common calls, such as <cite>ls</cite>, <cite>quota</cite> and making requests are wrapped in a few
+functions.</p>
+<dl class="function">
+<dt id="nla_client_lib.list_requests">
+<code class="sig-prename descclassname">nla_client_lib.</code><code class="sig-name descname">list_requests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla_client_lib.list_requests" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all retrieval requests which have not passed their retention date for the current user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>A dictionary containing details about the user and the user's requests, consisting of the following keys:</p>
+<ul class="simple">
+<li><p><strong>used</strong> (<cite>integer</cite>): the amount of quota the user has used, in bytes</p></li>
+<li><p><strong>notes</strong> (<cite>string</cite>): any notes about the user - affliations, projects, etc.</p></li>
+<li><p><strong>email</strong> (<cite>string</cite>): the email address for the user</p></li>
+<li><p><strong>user</strong> (<cite>string</cite>): the user id of the user - currently their JASMIN login</p></li>
+<li><p><strong>requests</strong> (<cite>List[Dictionary]</cite>): A list of dictionaries giving information about each request the user has made to the NLA system</p></li>
+<li><p><strong>id</strong> (<cite>integer</cite>): integer identifier for the user</p></li>
+<li><p><strong>size</strong> (<cite>integer</cite>): the size of the allocated quota for the current user</p></li>
+</ul>
+<p><br /></p>
+<p>Each &quot;requests&quot; Dictionary can contain the following keys (for each TapeRequest):</p>
+<ul class="simple">
+<li><p><strong>id</strong> (<cite>integer</cite>): the integer identifier of the request</p></li>
+<li><p><strong>request_date</strong> (<cite>DateTime</cite>): the date and time the request was made</p></li>
+<li><p><strong>retention</strong> (<cite>DateTime</cite>): the date and time the request will expire on</p></li>
+<li><p><strong>label</strong> (<cite>string</cite>): the label assigned to the request by the user, or a default of the request pattern or first file in a listing request</p></li>
+<li><p><strong>storaged_request_start</strong> (<cite>DateTime</cite>): the date and time the retrieval request started on StorageD</p></li>
+<li><p><strong>storaged_request_end</strong> (<cite>DateTime</cite>): the date and time the retrieval request concluded on StorageD</p></li>
+<li><p><strong>first_files_on_disk</strong> (<cite>DateTime</cite>): the date and time the first files arrived on the restore disk</p></li>
+<li><p><strong>last_files_on_disk</strong> (<cite>DateTime</cite>): the date and time the last files arrived on the restore disk</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returntype</dt>
+<dd class="field-even"><p>Dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="nla_client_lib.ls">
+<code class="sig-prename descclassname">nla_client_lib.</code><code class="sig-name descname">ls</code><span class="sig-paren">(</span><em class="sig-param">match</em>, <em class="sig-param">stages</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_client_lib.ls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of files in the NLA system given a pattern to match against, and a combination of stages
+of the files to filter on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>match</strong> (<em>string</em>) -- A pattern to match filenames against - i.e. does a filename contain this substring</p></li>
+<li><p><strong>stages</strong> (<em>string</em>) -- <p>Filter the files based on the stage of the file within the NLA system.  Stages can be any combination of <strong>UDTAR</strong></p>
+<ul>
+<li><p><strong>U</strong>: UNVERIFIED</p></li>
+<li><p><strong>D</strong>: ONDISK</p></li>
+<li><p><strong>T</strong>: ONTAPE</p></li>
+<li><p><strong>A</strong>: RESTORING</p></li>
+<li><p><strong>R</strong>: RESTORED</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>A dictionary containing information about the files which match the pattern and stages, consisting of these keys:</p>
+<ul class="simple">
+<li><p><strong>count</strong> (<em>integer</em>) : The number of files in the NLA system matching the pattern and stage</p></li>
+<li><p><strong>files</strong> (<em>List[Dictionary]</em>]) : A list of information about each file</p></li>
+</ul>
+<p><br /></p>
+<p>Each &quot;files&quot; Dictionary can contain the following keys (for each TapeFile):</p>
+<ul class="simple">
+<li><p><strong>path</strong> (<cite>string</cite>): logical path to the file.</p></li>
+<li><p><strong>stage</strong> (<cite>char</cite>): current stage of the file, one of <strong>UDTAR</strong> as above.</p></li>
+<li><p><strong>verified</strong> (<cite>DateTime</cite>): the date and time the file was verified on.</p></li>
+<li><p><strong>size</strong> (<cite>integer</cite>): the size of the file in bytes.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="nla_client_lib.make_request">
+<code class="sig-prename descclassname">nla_client_lib.</code><code class="sig-name descname">make_request</code><span class="sig-paren">(</span><em class="sig-param">patterns=None</em>, <em class="sig-param">retention=None</em>, <em class="sig-param">files=None</em>, <em class="sig-param">label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_client_lib.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a retrieval request into the NLA system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>patterns</strong> (<em>string</em>) -- (<cite>optional</cite>) pattern to match in a logical file path in request to restore files, e.g. &quot;1986&quot; to request to restore all files containing &quot;1986&quot;</p></li>
+<li><p><strong>retention</strong> (<em>DateTime</em>) -- (<cite>optional</cite>) time and date until when the files will remain in the restore area.  Default is 20 days.</p></li>
+<li><p><strong>files</strong> (<em>List</em><em>[</em><em>string</em><em>]</em>) -- (<cite>optional</cite>) list of files to request to restore</p></li>
+<li><p><strong>label</strong> (<em>string</em>) -- (<cite>optional</cite>) user supplied label for the request, visible when user examines their requests</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>A HTTP Response object. The two most important elements of this object are:</p>
+<ul>
+<li><p><strong>status_code</strong> (<cite>integer</cite>): the HTTP status code:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>200 OK: Request was successful</p></li>
+<li><p>403 FORBIDDEN: error with user quota: either the user quota is full or the user could not be found</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>json()</strong> (<cite>Dictionary</cite>): information about the request, the possible keys are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>req_id</strong> (<cite>integer</cite>): the unique numeric identifier for the request</p></li>
+<li><p><strong>error</strong> (<cite>string</cite>): error message if request fails</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="http://docs.python-requests.org/en/master/api/#requests.Response">requests.Response</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="nla_client_lib.show_request">
+<code class="sig-prename descclassname">nla_client_lib.</code><code class="sig-name descname">show_request</code><span class="sig-paren">(</span><em class="sig-param">request_number</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_client_lib.show_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the information for a single request, given the integer identifier of the request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>request_number</strong> (<em>integer</em>) -- the unique integer identifier for the request</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>A dictionary containing details about the request, consisting of the following keys:</p>
+<ul class="simple">
+<li><p><strong>id</strong> (<cite>integer</cite>): unique id of the request</p></li>
+<li><p><strong>quota</strong> (<cite>string</cite>): the user id for the quota to use in making the request</p></li>
+<li><p><strong>retention</strong> (<cite>DateTime</cite>): date when restored files will be removed from restore area</p></li>
+<li><p><strong>request_date</strong> (<cite>DateTime</cite>): date when a request was made</p></li>
+<li><p><strong>request_patterns</strong> (<cite>string</cite>): pattern to match against to retrieve files from tape</p></li>
+<li><p><strong>notify_on_first_file</strong> (<cite>string</cite>): email address to notify when first restored file is available in the restore area</p></li>
+<li><p><strong>notify_on_last_file</strong> (<cite>string</cite>): email address to notify when last file is available in restore area - i.e. the request is complete</p></li>
+<li><p><strong>label</strong> (<cite>string</cite>): a user defined label for the request</p></li>
+<li><p><strong>storaged_request_start</strong> (<cite>string</cite>): (<em>optional</em>) the date and time the retrieval request started on StorageD</p></li>
+<li><p><strong>storaged_request_end</strong> (<cite>string</cite>): (<em>optional</em>) the date and time the retrieval request concluded on StorageD</p></li>
+<li><p><strong>first_files_on_disk</strong> (<cite>string</cite>): (<em>optional</em>) the date and time the first files arrived on the restore disk</p></li>
+<li><p><strong>last_files_on_disk</strong> (<cite>string</cite>): (<em>optional</em>) the date and time the last files arrived on the restore disk</p></li>
+<li><p><strong>files</strong> (<cite>List[string]</cite>): list of files in the request</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="nla_client_lib.update_request">
+<code class="sig-prename descclassname">nla_client_lib.</code><code class="sig-name descname">update_request</code><span class="sig-paren">(</span><em class="sig-param">request_id</em>, <em class="sig-param">retention=None</em>, <em class="sig-param">label=None</em>, <em class="sig-param">notify_first=None</em>, <em class="sig-param">notify_last=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_client_lib.update_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an existing retrieval request in the NLA system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request_id</strong> (<em>integer</em>) -- the unique integer id of the request</p></li>
+<li><p><strong>retention</strong> (<em>DateTime</em>) -- (<cite>optional</cite>) time and date until when the files will remain in the restore area.  Default is 20 days.</p></li>
+<li><p><strong>label</strong> (<em>string</em>) -- (<cite>optional</cite>) user supplied label for the request, visible when user examines their requests</p></li>
+<li><p><strong>notify_first</strong> (<em>string</em>) -- (<cite>optional</cite>) email address to notify when first restored file is available in the restore area</p></li>
+<li><p><strong>notify_last</strong> (<em>string</em>) -- (<cite>optional</cite>) email address to notify when last file is available in restore area - i.e. the request is complete</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>A HTTP Response object. The two most important elements of this object are:</p>
+<ul>
+<li><p><strong>status_code</strong> (<cite>integer</cite>): the HTTP status code:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>200 OK: Request was successful</p></li>
+<li><p>403 FORBIDDEN: error with user quota: the user could not be found</p></li>
+<li><p>404 NOT FOUND: the request with <cite>request_id</cite> could not be found</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>json()</strong> (<cite>Dictionary</cite>): information about the request, the possible keys are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>req_id</strong> (<cite>integer</cite>): the unique numeric identifier for the request</p></li>
+<li><p><strong>error</strong> (<cite>string</cite>): error message if request fails</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><p><a class="reference external" href="http://docs.python-requests.org/en/master/api/#requests.Response">requests.Response</a></p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nla_client_settings.html" class="btn btn-neutral float-right" title="nla_client_settings.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nla_client_src.html" class="btn btn-neutral float-left" title="nla.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

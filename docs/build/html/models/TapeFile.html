@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>TapeFile &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Quota" href="Quota.html" />
+    <link rel="prev" title="RestoreDisk" href="RestoreDisk.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">NLA User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="models.html">Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="RestoreDisk.html">RestoreDisk</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TapeFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Quota.html">Quota</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TapeRequest.html">TapeRequest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StorageDSlot.html">StorageDSlot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rest_api/rest_api.html">REST API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nla_client/nla_client.html">Near Line Archive client</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="models.html">Models</a> &raquo;</li>
+        
+      <li>TapeFile</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/models/TapeFile.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tapefile">
+<h1>TapeFile<a class="headerlink" href="#tapefile" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nla_control.models.TapeFile">
+<em class="property">class </em><code class="sig-prename descclassname">nla_control.models.</code><code class="sig-name descname">TapeFile</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Files that are archived on tape as the primary media, and have been added to the NLA system via move_files_to_nla.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logical_path</strong> (<em>models.CharField</em>) -- The original logical of the file in the archive, before it was moved to tape</p></li>
+<li><p><a class="reference internal" href="TapeRequest.html#nla_control.models.TapeRequest.size" title="nla_control.models.TapeRequest.size"><strong>size</strong></a> (<em>FileSizeField</em>) -- The size of the file (in bytes)</p></li>
+<li><p><strong>verified</strong> (<em>models.DateTimeField</em>) -- The time and date that the file was verified within the NLA system</p></li>
+<li><p><strong>stage</strong> (<em>models.IntegerField</em>) -- <p>The stage that the file is at, one of <strong>UDTAR</strong></p>
+<ul>
+<li><p><strong>U</strong>: UNVERIFIED (3)</p></li>
+<li><p><strong>D</strong>: ONDISK (2)</p></li>
+<li><p><strong>T</strong>: ONTAPE (0)</p></li>
+<li><p><strong>A</strong>: RESTORING (1)</p></li>
+<li><p><strong>R</strong>: RESTORED (5)</p></li>
+</ul>
+</p></li>
+<li><p><strong>restore_disk</strong> (<em>models.ForeignKey</em>) -- A reference to the RestoreDisk where the file has been restored to</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="exception">
+<dt id="nla_control.models.TapeFile.DoesNotExist">
+<em class="property">exception </em><code class="sig-name descname">DoesNotExist</code><a class="headerlink" href="#nla_control.models.TapeFile.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="nla_control.models.TapeFile.MultipleObjectsReturned">
+<em class="property">exception </em><code class="sig-name descname">MultipleObjectsReturned</code><a class="headerlink" href="#nla_control.models.TapeFile.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeFile.add">
+<em class="property">static </em><code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param">file_path</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to add a logical path as a TapeFile if its not already present on the NLA system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>string</em>) -- The (original) logical path to the file, before it was archived to tape</p></li>
+<li><p><strong>size</strong> (<em>integer</em>) -- The size of the file, in bytes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeFile.archive_volume_path">
+<code class="sig-name descname">archive_volume_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile.archive_volume_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current volume path for a file. e.g. /datacentre/archvol/pan52/archive</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>volume path of the TapeFile</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeFile.load_storage_paths">
+<em class="property">static </em><code class="sig-name descname">load_storage_paths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile.load_storage_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the fileset logical paths to spotname mappings by retrieving the spotnames from a URL,
+finding the corresponding logical path for the spot and reformatiing them into a dictionary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeFile.match">
+<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param">pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the logical path of this TapeFile matches the input pattern (a UNIX filesystem pattern).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>string</em>) -- The UNIX filesystem pattern to match against</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span> <span class="pre">|</span> <span class="pre">False</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeFile.spotname">
+<code class="sig-name descname">spotname</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile.spotname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return portion of path that maps to spot name, and the spotname for a file.
+e.g. <code class="docutils literal notranslate"><span class="pre">/badc/cira/data/x.dat</span> <span class="pre">-&gt;</span> <span class="pre">/badc/cira,</span> <span class="pre">spot-1234-cira</span></code></p>
+<p>This function is used to give the elements needed to construct a storage path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple of (logical_spot_path, spot_name)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(string, string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeFile.storage_path">
+<code class="sig-name descname">storage_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeFile.storage_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current storage path to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>storage path of the TapeFile</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Quota.html" class="btn btn-neutral float-right" title="Quota" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="RestoreDisk.html" class="btn btn-neutral float-left" title="RestoreDisk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

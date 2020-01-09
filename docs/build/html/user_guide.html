@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>NLA User Guide &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Models" href="models/models.html" />
+    <link rel="prev" title="Near-line Archive" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NLA User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-the-tape-archive-from-jasmin">Accessing the tape archive from JASMIN.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models/models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rest_api/rest_api.html">REST API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nla_client/nla_client.html">Near Line Archive client</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>NLA User Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/user_guide.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="nla-user-guide">
+<h1>NLA User Guide<a class="headerlink" href="#nla-user-guide" title="Permalink to this headline">¶</a></h1>
+<p>Some times we keep data on tape only. This is used for very voluminous datasets, for example, Sentinel data.</p>
+<div class="section" id="accessing-the-tape-archive-from-jasmin">
+<h2>Accessing the tape archive from JASMIN.<a class="headerlink" href="#accessing-the-tape-archive-from-jasmin" title="Permalink to this headline">¶</a></h2>
+<p>Request a tape quota by emailing the CEDA help desk.</p>
+<p>Download the command line interface from <a class="reference external" href="https://github.com/cedadev/nla_client.git">https://github.com/cedadev/nla_client.git</a></p>
+<p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/cedadev/nla_client.git</span></code></p>
+<p>First run the client by running</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">nla.py</span></code></p>
+<p>You can type &quot;help&quot; to get a list of help topics / commands.  Type help &lt;command&gt; to get help using a particular command.</p>
+<p>The first thing to do determine the names of the files in the NLA that you want to restore.  You use the “ls” command to do this, which can also take a substring to search for, e.g. “ls sentinel1a”</p>
+<p>There are two ways to make a request:</p>
+<ol class="arabic simple">
+<li><p>Listing request.  Here you supply a list of file names to restore in a file.  E.g. “listing_request request_1.txt”. (you can supply any path to the listing file, here it’s in the same directory as nla.py, which is probably not how you would be invoking it)</p></li>
+<li><p>Pattern request.  Here you supply a substring that must appear in the filename.  E.g. “pattern_request 2015” will recover all files with “2015” in the filename.  This particular request (2015) is not recommend as it will restore a lot of files!  Something more specific like “S2A_OPER_PRD_MSIL1C_PDMC_20161007” would be better</p></li>
+</ol>
+<p>You can view your requests by invoking “requests” (and see how much of your quota you have used)</p>
+<p>You can view the details of a request by “req request-number”</p>
+<p>You can check which files are in a request by “requested_files request-number”</p>
+<p>Requests have a retention date.  After this date the restored files will be removed.  You can extend this retention date by using “retain request-number yyyy-mm-dd”</p>
+<p>You can expire a request early using “expire request-number”.  This will remove your restored files within 24 hours and free up some of your quota.</p>
+<p>You can label a request by using “label label-name”.  The default label name is either the first file in a listing_request or the pattern in a pattern_request.</p>
+<p>You can be informed via email when your files are ready using the “notify” command.  The system knows your email address so simply doing “notify” will inform you when the first files arrive and the last files arrive.  To notify someone else use “notify email-address”.  To notify different people when the first and last arrive use “notify_first email-address” and “notify_last” email-address.</p>
+<p>You can check your quota via “quota”</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="models/models.html" class="btn btn-neutral float-right" title="Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Near-line Archive" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

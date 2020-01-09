@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>nla.py &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nla_client_lib.py" href="nla_client_lib.html" />
+    <link rel="prev" title="Near Line Archive client" href="nla_client.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">NLA User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rest_api/rest_api.html">REST API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="nla_client.html">Near Line Archive client</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">nla.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nla_client_lib.html">nla_client_lib.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nla_client_settings.html">nla_client_settings.py</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="nla_client.html">Near Line Archive client</a> &raquo;</li>
+        
+      <li>nla.py</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/nla_client/nla_client_src.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="nla-py">
+<h1>nla.py<a class="headerlink" href="#nla-py" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nla.nla_cmd">
+<em class="property">class </em><code class="sig-prename descclassname">nla.</code><code class="sig-name descname">nla_cmd</code><span class="sig-paren">(</span><em class="sig-param">completekey='tab'</em>, <em class="sig-param">stdin=None</em>, <em class="sig-param">stdout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>nla.py provides a command line interface to the NLA system that can be run from JASMIN.</p>
+<p>It provides a number of commands for performing common tasks with the NLA, such as making a request
+for files to be restored, changing the retention date of requests, checking a users quota, etc.</p>
+<p>It is built upon the Python cmd library:  <a class="reference external" href="https://docs.python.org/2/library/cmd.html">cmd Support for line-oriented command interpreters</a>,
+and so each function takes the command argument (a string) as its input parameter.</p>
+<dl class="method">
+<dt id="nla.nla_cmd.check_request_id">
+<em class="property">static </em><code class="sig-name descname">check_request_id</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.check_request_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>check the first element of a line is a valid request id.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_EOF">
+<code class="sig-name descname">do_EOF</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_EOF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_expire">
+<code class="sig-name descname">do_expire</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_expire" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a request as expired by setting the retention date to now.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_label">
+<code class="sig-name descname">do_label</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a label to a request.
+NLA&gt;&gt;&gt; label 23 John's list of files
+This labels request number 23 &quot;John's list of files&quot;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_listing_request">
+<code class="sig-name descname">do_listing_request</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_listing_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a tape request from a file listing. The file paths should be one per line and absolute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_ls">
+<code class="sig-name descname">do_ls</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_ls" title="Permalink to this definition">¶</a></dt>
+<dd><p>List files in the NLA system.</p>
+<p>Files in the system go through various stages:</p>
+<ul class="simple">
+<li><p><strong>U</strong>: &quot;Unverified&quot; files have been earmarked for tape only archive, but are not yet checked to see if the tape copy is valid.</p></li>
+<li><p><strong>D</strong> &quot;On Disk&quot; files have been verified as having a valid tape copy but have not had the original disk copy deleted.</p></li>
+<li><p><strong>T</strong> &quot;On Tape&quot; files have been removed from disk and only exist as a tape copy.</p></li>
+<li><p><strong>A</strong> &quot;Restoring&quot; files are in the process of Actively being restored to disk.</p></li>
+<li><dl class="simple">
+<dt><strong>R</strong> &quot;Restored&quot; files are on restoreed to disk. A symlink from the original path points to its tempory location.</dt><dd><p>After the restore request has expired, the disk copy will be removed and the file will be
+labelled as &quot;On Tape&quot; again.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="simple">
+<dt>Use the -stage option to list only files at certain stages.  e.g. to list unverified, on disk and on tape files:</dt><dd><p>ls -stages=UDT</p>
+</dd>
+<dt>The rest of the arguments are a simple contains filter. e.g. for all files with 2015/12/04 in the path:</dt><dd><p>ls 2015/12/04</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_notify">
+<code class="sig-name descname">do_notify</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the email address to notify for the arrivals of both the first and last file from tape.
+i.e. combine notify_first and notify_last to have the same email address</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_notify_first">
+<code class="sig-name descname">do_notify_first</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_notify_first" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the email address to notify on the arrival of the first file from tape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_notify_last">
+<code class="sig-name descname">do_notify_last</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_notify_last" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the email address to notify on the arrival of the last file from tape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_pattern_request">
+<code class="sig-name descname">do_pattern_request</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_pattern_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request files by matching the pattern string to a substring in the filename</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_quit">
+<code class="sig-name descname">do_quit</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_quit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_quota">
+<code class="sig-name descname">do_quota</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_quota" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check amount of quota remaining</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_req">
+<code class="sig-name descname">do_req</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_req" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show details of a request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_requested_files">
+<code class="sig-name descname">do_requested_files</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_requested_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the files in a request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_requests">
+<code class="sig-name descname">do_requests</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_requests" title="Permalink to this definition">¶</a></dt>
+<dd><p>List requests for current user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.do_retain">
+<code class="sig-name descname">do_retain</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.do_retain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a retention date for a request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla.nla_cmd.emptyline">
+<code class="sig-name descname">emptyline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla.nla_cmd.emptyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an empty line is entered in response to the prompt.</p>
+<p>If this method is not overridden, it repeats the last nonempty
+command entered.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nla_client_lib.html" class="btn btn-neutral float-right" title="nla_client_lib.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nla_client.html" class="btn btn-neutral float-left" title="Near Line Archive client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

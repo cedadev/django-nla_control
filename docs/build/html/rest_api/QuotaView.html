@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quota Requests &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tape File Requests" href="TapeFileView.html" />
+    <link rel="prev" title="Tape Request Requests" href="RequestView.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">NLA User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="rest_api.html">REST API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="RequestView.html">Tape Request Requests</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quota Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TapeFileView.html">Tape File Requests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../nla_client/nla_client.html">Near Line Archive client</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="rest_api.html">REST API</a> &raquo;</li>
+        
+      <li>Quota Requests</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/rest_api/QuotaView.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="quota-requests">
+<h1>Quota Requests<a class="headerlink" href="#quota-requests" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nla_control.views.QuotaView">
+<em class="property">class </em><code class="sig-prename descclassname">nla_control.views.</code><code class="sig-name descname">QuotaView</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.views.QuotaView" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rest-api</p>
+<p>Requests to resources which return information about a users Quota in the NLA system</p>
+<dl class="method">
+<dt id="nla_control.views.QuotaView.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">request</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.views.QuotaView.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rest-api</p>
+<dl class="get">
+<dt id="get--nla_control-api-v1-quota-id">
+<code class="sig-name descname">GET </code><code class="sig-name descname">/nla_control/api/v1/quota/id</code><a class="headerlink" href="#get--nla_control-api-v1-quota-id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get information about the user, specifically their quota, request and user details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>string</em>) -- unique id for the user - currently the same as their JASMIN user-id</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Response JSON Array of Objects</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>integer</em>) -- numeric id for the user</p></li>
+<li><p><strong>user</strong> (<em>string</em>) -- user name (as on JASMIN) for the user, the same as the quota name</p></li>
+<li><p><strong>size</strong> (<em>integer</em>) -- quota size in bytes</p></li>
+<li><p><strong>used</strong> (<em>integer</em>) -- amount used from quota, in bytes</p></li>
+<li><p><strong>email</strong> (<em>string</em>) -- email address of the user</p></li>
+<li><p><strong>notes</strong> (<em>string</em>) -- any notes on the user (project associated with, etc.)</p></li>
+<li><p><strong>requests</strong> (<em>List[Dictionary]</em>) -- list of requests submitted by the user.  Each dictionary contains:</p></li>
+</ul>
+</dd>
+</dl>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>id</strong> (<cite>integer</cite>): the id of the request</p></li>
+<li><p><strong>request_date</strong> (<cite>DateTime</cite>): the date and time the request was made</p></li>
+<li><p><strong>retention</strong> (<cite>DateTime</cite>): the date and time the request will expire on</p></li>
+<li><p><strong>label</strong> (<cite>string</cite>): the label assigned to the request by the user, or a default of the request pattern or first file in a listing request</p></li>
+<li><p><strong>storaged_request_start</strong> (<cite>DateTime</cite>): (<em>optional</em>) the date and time the retrieval request started on StorageD</p></li>
+<li><p><strong>storaged_request_end</strong> (<cite>DateTime</cite>): (<em>optional</em>) the date and time the retrieval request concluded on StorageD</p></li>
+<li><p><strong>first_files_on_disk</strong> (<cite>DateTime</cite>): (<em>optional</em>) the date and time the first files arrived on the restore disk</p></li>
+<li><p><strong>last_files_on_disk</strong> (<cite>DateTime</cite>): (<em>optional</em>) the date and time the last files arrived on the restore disk</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> -- request completed successfully.</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> -- user with <cite>id</cite> not found.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example request</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/nla_control/api/v1/quota/dhk63261</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">nla.ceda.ac.uk</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;used&quot;</span><span class="p">:</span> <span class="mi">1981562009</span><span class="p">,</span>
+    <span class="nt">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;Test user account for Neil Massey&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="nt">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;dhk63261&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;requests&quot;</span><span class="p">:</span> <span class="p">[</span>
+                  <span class="p">{</span>
+                    <span class="nt">&quot;last_files_on_disk&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:49.679483&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;request_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:00:56.786661&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;first_files_on_disk&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:49.652354&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2016/02/23/S1A_IW_GRDH_1SSV_20160223T132730_20160223T132755_010074_00ED60_3761&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;storaged_request_start&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:28.614195&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;storaged_request_end&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:49.679476&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">225</span><span class="p">,</span>
+                    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-03-10T00:00:00&quot;</span>
+                  <span class="p">},</span>
+                  <span class="p">{</span>
+                    <span class="nt">&quot;last_files_on_disk&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-06T12:16:29.912293&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;request_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-06T11:02:17.498464&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;first_files_on_disk&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-06T12:15:21.549330&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;/neodc/sentinel2a/data/L1C_MSI/2016/10/07/S2A_OPER_PRD_MSIL1C_PDMC_20161007T232231_R040_V20161007T162332_20161007T163154.zip&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;storaged_request_start&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-06T11:57:49.437537&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;storaged_request_end&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-06T12:16:29.912284&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">212</span><span class="p">,</span>
+                    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-03-30T00:00:00&quot;</span>
+                  <span class="p">}</span>
+                <span class="p">],</span>
+    <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;neil.massey@stfc.ac.uk&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="mi">1099511627776</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="TapeFileView.html" class="btn btn-neutral float-right" title="Tape File Requests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="RequestView.html" class="btn btn-neutral float-left" title="Tape Request Requests" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

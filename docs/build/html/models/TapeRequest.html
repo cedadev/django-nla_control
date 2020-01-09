@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>TapeRequest &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="StorageDSlot" href="StorageDSlot.html" />
+    <link rel="prev" title="Quota" href="Quota.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">NLA User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="models.html">Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="RestoreDisk.html">RestoreDisk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TapeFile.html">TapeFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Quota.html">Quota</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TapeRequest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StorageDSlot.html">StorageDSlot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rest_api/rest_api.html">REST API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nla_client/nla_client.html">Near Line Archive client</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="models.html">Models</a> &raquo;</li>
+        
+      <li>TapeRequest</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/models/TapeRequest.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="taperequest">
+<h1>TapeRequest<a class="headerlink" href="#taperequest" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nla_control.models.TapeRequest">
+<em class="property">class </em><code class="sig-prename descclassname">nla_control.models.</code><code class="sig-name descname">TapeRequest</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tape file staging requests.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<em>models.CharField</em>) -- A user assigned label for the request</p></li>
+<li><p><strong>quota</strong> (<em>models.ForeignKey</em>) -- A reference to the user id (and their quota) that made the request</p></li>
+<li><p><strong>retention</strong> (<em>models.DateTimeField</em>) -- The date and time when the restored file will be removed from the restore area</p></li>
+<li><p><strong>request_date</strong> (<em>models.DateTimeField</em>) -- The time and date the request was made</p></li>
+<li><p><strong>active_request</strong> (<em>models.BooleanField</em>) -- Whether a request is currently active or not.  Modified by update_requests in process_requests.py</p></li>
+<li><p><strong>storaged_request_start</strong> (<em>models.DateTimeField</em>) -- the date and time the retrieval request started on StorageD</p></li>
+<li><p><strong>storaged_request_end</strong> (<em>models.DateTimeField</em>) -- the date and time the retrieval request concluded on StorageD</p></li>
+<li><p><strong>first_files_on_disk</strong> (<em>models.DateTimeField</em>) -- the date and time the first files arrived on the restore disk</p></li>
+<li><p><strong>last_files_on_disk</strong> (<em>models.DateTimeField</em>) -- the date and time the last files arrived on the restore disk</p></li>
+<li><p><strong>files</strong> (<em>models.ManyToManyField</em>) -- list of files in the request.  Modified by update_requests in process_requests.py</p></li>
+<li><p><strong>request_files</strong> (<em>models.TextField</em>) -- A list of files requested by the user</p></li>
+<li><p><strong>request_patterns</strong> (<em>models.CharField</em>) -- pattern to match against to retrieve files from tape</p></li>
+<li><p><strong>notify_on_first_file</strong> (<em>models.CharField</em>) -- email address to notify when first restored file is available in the restore area</p></li>
+<li><p><strong>notify_on_last_file</strong> (<em>models.CharField</em>) -- email address to notify when last file is available in restore area - i.e. the request is complete</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="exception">
+<dt id="nla_control.models.TapeRequest.DoesNotExist">
+<em class="property">exception </em><code class="sig-name descname">DoesNotExist</code><a class="headerlink" href="#nla_control.models.TapeRequest.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="nla_control.models.TapeRequest.MultipleObjectsReturned">
+<em class="property">exception </em><code class="sig-name descname">MultipleObjectsReturned</code><a class="headerlink" href="#nla_control.models.TapeRequest.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeRequest.set_notify">
+<code class="sig-name descname">set_notify</code><span class="sig-paren">(</span><em class="sig-param">on_first=None</em>, <em class="sig-param">on_last=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeRequest.set_notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the email address for where to send the notifications of the first files arriving on disk and the
+last files arriving on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>on_first</strong> (<em>string</em>) -- email address for the first files on disk notification to be sent to</p></li>
+<li><p><strong>on_last</strong> (<em>string</em>) -- email address for the last files on disk notification to be sent to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeRequest.set_retention">
+<code class="sig-name descname">set_retention</code><span class="sig-paren">(</span><em class="sig-param">retention</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeRequest.set_retention" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the retention date for the request.  Files in the request will be maintained on disk until the retention
+date is passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>retention</strong> (<em>DateTime</em>) -- The new retention date for the request</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.models.TapeRequest.size">
+<code class="sig-name descname">size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.models.TapeRequest.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of all the files in a request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Total size</p>
+</dd>
+<dt class="field-even">Returntype</dt>
+<dd class="field-even"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="StorageDSlot.html" class="btn btn-neutral float-right" title="StorageDSlot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Quota.html" class="btn btn-neutral float-left" title="Quota" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

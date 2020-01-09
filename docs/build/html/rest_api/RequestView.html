@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="gb" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="gb" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tape Request Requests &mdash; Near-line Archive 0.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Quota Requests" href="QuotaView.html" />
+    <link rel="prev" title="REST API" href="rest_api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Near-line Archive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">NLA User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_scripts/test_scripts.html">Test Scripts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="rest_api.html">REST API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tape Request Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QuotaView.html">Quota Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TapeFileView.html">Tape File Requests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../nla_client/nla_client.html">Near Line Archive client</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Near-line Archive</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="rest_api.html">REST API</a> &raquo;</li>
+        
+      <li>Tape Request Requests</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/rest_api/RequestView.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tape-request-requests">
+<h1>Tape Request Requests<a class="headerlink" href="#tape-request-requests" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nla_control.views.RequestView">
+<em class="property">class </em><code class="sig-prename descclassname">nla_control.views.</code><code class="sig-name descname">RequestView</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.views.RequestView" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rest-api</p>
+<p>Requests to resources which put (PUT) a request for file retrieval from tape into the NLA system,
+get (GET) information about a single request and modify (POST) a single request.</p>
+<dl class="method">
+<dt id="nla_control.views.RequestView.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">request</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.views.RequestView.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rest-api</p>
+<dl class="get">
+<dt id="get--nla_control-api-v1-requests-req_id">
+<code class="sig-name descname">GET </code><code class="sig-name descname">/nla_control/api/v1/requests/req_id</code><a class="headerlink" href="#get--nla_control-api-v1-requests-req_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get information about a single request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>req_id</strong> (<em>integer</em>) -- (<em>optional</em>) unique id for the request</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Response JSON Array of Objects</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>integer</em>) -- unique id of the request</p></li>
+<li><p><strong>quota</strong> (<em>string</em>) -- the user id for the quota to use in making the request</p></li>
+<li><p><strong>retention</strong> (<em>DateTime</em>) -- date when restored files will be removed from restore area</p></li>
+<li><p><strong>request_date</strong> (<em>DateTime</em>) -- date when a request was made</p></li>
+<li><p><strong>request_patterns</strong> (<em>string</em>) -- pattern to match against to retrieve files from tape</p></li>
+<li><p><strong>notify_on_first_file</strong> (<em>string</em>) -- email address to notify when first restored file is available in the restore area</p></li>
+<li><p><strong>notify_on_last_file</strong> (<em>string</em>) -- email address to notify when last file is available in restore area - i.e. the request is complete</p></li>
+<li><p><strong>label</strong> (<em>string</em>) -- a user defined label for the request</p></li>
+<li><p><strong>storaged_request_start</strong> (<em>string</em>) -- (<em>optional</em>) the date and time the retrieval request started on StorageD</p></li>
+<li><p><strong>storaged_request_end</strong> (<em>string</em>) -- (<em>optional</em>) the date and time the retrieval request concluded on StorageD</p></li>
+<li><p><strong>first_files_on_disk</strong> (<em>string</em>) -- (<em>optional</em>) the date and time the first files arrived on the restore disk</p></li>
+<li><p><strong>last_files_on_disk</strong> (<em>string</em>) -- (<em>optional</em>) the date and time the last files arrived on the restore disk</p></li>
+<li><p><strong>files</strong> (<em>List[string]</em>) -- list of files in the request</p></li>
+</ul>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> -- request completed successfully</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> -- request with <cite>req_id</cite> not found</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example request</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/nla_control/api/v1/requests/225</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">nla.ceda.ac.uk</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;files&quot;</span><span class="p">:</span> <span class="p">[</span>
+               <span class="s2">&quot;/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2016/02/23/S1A_IW_GRDH_1SSV_20160223T132730_20160223T132755_010074_00ED60_3761.zip&quot;</span>
+             <span class="p">],</span>
+    <span class="nt">&quot;request_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:00:56.786661&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;first_files_on_disk&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:49.652354&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;quota&quot;</span><span class="p">:</span> <span class="s2">&quot;dhk63261&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;storaged_request_start&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:28.614195&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;request_patterns&quot;</span><span class="p">:</span> <span class="s2">&quot;/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2016/02/23/S1A_IW_GRDH_1SSV_20160223T132730_20160223T132755_010074_00ED60_3761&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;notify_on_last_file&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">225</span><span class="p">,</span>
+    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-03-10T00:00:00&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;last_files_on_disk&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:49.679483&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;notify_on_first_file&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2016/02/23/S1A_IW_GRDH_1SSV_20160223T132730_20160223T132755_010074_00ED60_3761&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;storaged_request_end&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-08T14:01:49.679476&quot;</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--nla_control-api-v1-requests">
+<code class="sig-name descname">GET </code><code class="sig-name descname">/nla_control/api/v1/requests</code><a class="headerlink" href="#get--nla_control-api-v1-requests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of all requests which have not passed their retention date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Response JSON Array of Objects</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>requests</strong> (<em>List[Dictionary]</em>) -- list of all requests submitted to the NLA system.  Each dictionary contains:</p></li>
+</ul>
+</dd>
+</dl>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>id</strong> (<em>integer</em>): the id of the request</p></li>
+<li><p><strong>quota</strong> (<em>string</em>): the user who made the request</p></li>
+<li><p><strong>retention</strong> (<em>DateTime</em>): the date and time the request will expire on</p></li>
+<li><p><strong>request_date</strong> (<em>DateTime</em>): the date and time the request was made</p></li>
+<li><p><strong>label</strong> (<em>string</em>): the label assigned to the request by the user, or a default of the request pattern or first file in a listing request</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> -- request completed successfully</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example request</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/nla_control/api/v1/requests</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">nla.ceda.ac.uk</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;requests&quot;</span><span class="p">:</span> <span class="p">[</span>
+                  <span class="p">{</span>
+                    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;/neodc/sentinel1a/data/IW/L1_SLC/IPF_v2/2016/12/30/S1A_IW_SLC__1SDV_20161230T153351_20161230T153418_014611_017C04_9E83.zip&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-03-29T00:00:00&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">257</span><span class="p">,</span>
+                    <span class="nt">&quot;request_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-27T12:58:02.398858&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;quota&quot;</span><span class="p">:</span> <span class="s2">&quot;jweiss&quot;</span>
+                  <span class="p">},</span>
+                  <span class="p">{</span>
+                    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;/neodc/sentinel1a/data/IW/L1_SLC/IPF_v2/2015/04/16/S1A_IW_SLC__1SSV_20150416T135155_20150416T135225_005510_007092_F761.zip&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-03-29T00:00:00&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">262</span><span class="p">,</span>
+                    <span class="nt">&quot;request_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-02-27T18:42:42.313259&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;quota&quot;</span><span class="p">:</span> <span class="s2">&quot;dcm39&quot;</span>
+                  <span class="p">},</span>
+                  <span class="p">{</span>
+                    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;FTEP and UK&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-01-01T00:00:00&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">129</span><span class="p">,</span>
+                    <span class="nt">&quot;request_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2016-12-02T12:15:35.975215&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;quota&quot;</span><span class="p">:</span> <span class="s2">&quot;ewilliamson01&quot;</span>
+                  <span class="p">}</span>
+                <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.views.RequestView.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param">request</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.views.RequestView.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rest-api</p>
+<dl class="post">
+<dt id="post--nla_control-api-v1-requests">
+<code class="sig-name descname">POST </code><code class="sig-name descname">/nla_control/api/v1/requests</code><a class="headerlink" href="#post--nla_control-api-v1-requests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a request to restore a file from tape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Request JSON Array of Objects</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quota</strong> (<em>string</em>) -- the user id for the quota to use in making the request</p></li>
+<li><p><strong>patterns</strong> (<em>string</em>) -- (<em>optional</em>) pattern to match against to retrieve files from tape</p></li>
+<li><p><strong>files</strong> (<em>string</em>) -- (<em>optional</em>) list of files to retrieve from tape</p></li>
+<li><p><strong>retention</strong> (<em>DateTime</em>) -- (<em>optional</em>) date when restored files will be removed from restore area.  Default is 5 days from when the request was made.</p></li>
+<li><p><strong>label</strong> (<em>string</em>) -- (<em>optional</em>) a user defined label for the request</p></li>
+<li><p><strong>notify_on_first_file</strong> (<em>string</em>) -- (<em>optional</em>) email address to notify when first restored file is available in the restore area</p></li>
+<li><p><strong>notify_on_last_file</strong> (<em>string</em>) -- (<em>optional</em>) email address to notify when last file is available in restore area - i.e. the request is complete</p></li>
+</ul>
+</dd>
+<dt class="field-even">Response JSON Object</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>req_id</strong> (<em>integer</em>) -- success, the unique identifier of the request</p></li>
+<li><p><strong>error_msg</strong> (<em>string</em>) -- error, a message detailing the error is returned</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> -- request completed successfully</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> -- error with user quota: either the user quota is full or the user could not be found</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example request</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/nla_control/api/v1/requests</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">nla.ceda.ac.uk</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;patterns&quot;</span><span class="p">:</span> <span class="s2">&quot;1986&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;quota&quot;</span><span class="p">:</span> <span class="s2">&quot;dhk63261&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-04-01&quot;</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;req_id&quot;</span><span class="p">:</span> <span class="mi">23</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Requested file(s) exceed user&#39;s quota&quot;</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="nla_control.views.RequestView.put">
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param">request</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nla_control.views.RequestView.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rest-api</p>
+<dl class="put">
+<dt id="put--nla_control-api-v1-requests-req_id">
+<code class="sig-name descname">PUT </code><code class="sig-name descname">/nla_control/api/v1/requests/req_id</code><a class="headerlink" href="#put--nla_control-api-v1-requests-req_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a request to restore a file from tape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>req_id</strong> (<em>integer</em>) -- unique id of request to update</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Request JSON Array of Objects</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quota</strong> (<em>string</em>) -- the user id for the quota to use in making the request</p></li>
+<li><p><strong>retention</strong> (<em>DateTime</em>) -- (<em>optional</em>) date when restored files will be removed from restore area.  Default is 5 days from when the request was made.</p></li>
+<li><p><strong>label</strong> (<em>string</em>) -- (<em>optional</em>) a user defined label for the request</p></li>
+<li><p><strong>notify_on_first_file</strong> (<em>string</em>) -- (<em>optional</em>) email address to notify when first restored file is available in the restore area</p></li>
+<li><p><strong>notify_on_last_file</strong> (<em>string</em>) -- (<em>optional</em>) email address to notify when last file is available in restore area - i.e. the request is complete</p></li>
+</ul>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> -- request completed successfully</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> -- user id could not be found: they have no associated quota</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> -- request with <cite>req_id</cite> could not be found</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example request</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">PUT</span> <span class="nn">/nla_control/api/v1/requests/23</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">nla.ceda.ac.uk</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Test request for 1986 data&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;quota&quot;</span><span class="p">:</span> <span class="s2">&quot;dhk63261&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;retention&quot;</span><span class="p">:</span> <span class="s2">&quot;2017-04-01&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;notify_on_first_file&quot;</span><span class="p">:</span> <span class="s2">&quot;neil.massey@stfc.ac.uk&quot;</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;req_id&quot;</span><span class="p">:</span> <span class="mi">23</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;No quota for user dhk8934&quot;</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="QuotaView.html" class="btn btn-neutral float-right" title="Quota Requests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rest_api.html" class="btn btn-neutral float-left" title="REST API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Centre for Environmental Data Analysis, Science and Technologies Facilities Council
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
