@@ -13,7 +13,7 @@ def is_rest_api(processed_doc_string):
             if str(":rest-api") == str(y):
                is_rest = True
     return is_rest
-    
+
 
 class RESTDocumenterMixin(object):
     """
@@ -58,8 +58,8 @@ class RESTDocumenterMixin(object):
 
             # document members, if possible
             self.document_members(all_members)
-            
-    
+
+
     def process_doc(self, docstrings):
         # remove the ":rest-api" docstring from the list of docstrings"
         if not is_rest_api(self.get_doc()):
@@ -76,11 +76,11 @@ class RESTDocumenterMixin(object):
 class RestMethodDocumenter(RESTDocumenterMixin, autodoc.MethodDocumenter):
     pass
 
-        
+
 class RestClassDocumenter(RESTDocumenterMixin, autodoc.ClassDocumenter):
     pass
 
 
-def setup(app):
+def setup():
     autodoc.add_documenter(RestMethodDocumenter)
     autodoc.add_documenter(RestClassDocumenter)

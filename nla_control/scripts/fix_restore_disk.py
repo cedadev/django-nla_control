@@ -14,16 +14,16 @@ This is designed to be used via the django-extensions runscript command
 
 # import nla objects
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 
 def run():
     """Entry point for the Django script"""
     # get the first RestoreDisk
     restore_disk = RestoreDisk.objects.all()[0]
-    
+
     # get the restored_files
     restored_files = TapeFile.objects.filter(stage=TapeFile.RESTORED)
-    
+
     # loop over and set the RestoreDisk
     for f in restored_files:
         if f.restore_disk == None:

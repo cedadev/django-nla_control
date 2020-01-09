@@ -9,7 +9,7 @@ import os
 import datetime
 import subprocess
 import sys
-from nla_control.settings import *
+from nla_site.settings import *
 
 # load storage paths to do path translation to from logical to storage paths.
 TapeFile.load_storage_paths()
@@ -61,14 +61,14 @@ def run(*args):
         n_processes = 0
         for l in lines:
             if "verify" in l and not "/bin/sh" in l:
-                print l
-                print "Process already running, exiting"
+                print(l)
+                print("Process already running, exiting")
                 n_processes += 1
     except:
         n_processes = 1
 
     files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
-    print "Number of UNVERIFIED files: " + str(len(files))
+    print("Number of UNVERIFIED files: " + str(len(files)))
 
     if "verify_now" in args:
         verify_now = True
@@ -174,9 +174,9 @@ def run(*args):
     # print the errors:
     print ("Missing restore log files")
     for mf in missing_log_files:
-        print "    {}".format(mf)
+        print("    {}".format(mf))
 
-    print
+    print()
     print ("Errors in log files")
     for ef in error_log_files:
-        print "    {}".format(ef)
+        print("    {}".format(ef))

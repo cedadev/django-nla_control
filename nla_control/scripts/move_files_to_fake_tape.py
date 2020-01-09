@@ -4,7 +4,7 @@
 __author__ = 'dhk63261' # NRM
 
 from nla_control.models import TapeFile
-from nla_control.settings import *
+from nla_site.settings import *
 import shutil
 import os
 

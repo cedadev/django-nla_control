@@ -17,7 +17,7 @@
 
 # import nla objects
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 import nla_control
 
 from django.core.mail import send_mail
@@ -53,9 +53,9 @@ def update_requests():
     for r in requests[::-1]:
         new_files = []
         present_tape_files = []
-        print "    Request ID " + str(r.id) + " user " + r.quota.user,
+        print("    Request ID " + str(r.id) + " user " + r.quota.user,)
         if r.active_request:
-            print " already active"
+            print(" already active")
             continue
         # check whether the number of files downloaded is the same number as requested and continue if it is
         nfiles = r.files.filter(Q(stage=TapeFile.ONDISK) | Q(stage=TapeFile.RESTORED))
@@ -72,9 +72,9 @@ def update_requests():
                 r.active_request = True
                 r.files = present_tape_files.all()
                 r.save()
-                print "making active with " + str(present_tape_files.count()) + " new files"
+                print("making active with " + str(present_tape_files.count()) + " new files")
             else:
-                print
+                print()
             continue
 
         elif r.request_files != "":
@@ -91,10 +91,10 @@ def update_requests():
         if new_files.count() != 0:
             r.files.add(*(list(new_files.all())))
             r.active_request = True
-            print "making active with " + str(new_files.count()) + " new files"
+            print("making active with " + str(new_files.count()) + " new files")
         else:
             r.active_request = False
-            print
+            print()
         r.save()
 
 
@@ -431,12 +431,12 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
                                      port=9200
                                      ).update_location(file_list=restored_files, params=params, search_query=query, on_disk=True)
 
-                print "Updated Elastic Search index for files ",
+                print("Updated Elastic Search index for files ",)
                 for f in restored_files:
-                    print " - " + str(f)
+                    print(" - " + str(f))
         except Exception as e:
-            print "Failed updating Elastic Search Index ",
-            print e, restored_files
+            print("Failed updating Elastic Search Index ",)
+            print(e, restored_files)
         log_file.close()
         log_file = None
 
@@ -490,7 +490,7 @@ def start_retrieval(slot):
     target_disk = get_restore_disk(slot)
     # error check - no room on the disk returns None
     if target_disk is None:
-        print "ERROR: No RestoreDisks exist with enough space to hold the request"
+        print("ERROR: No RestoreDisks exist with enough space to hold the request")
         return False
 
     # create the retrieve listing file and get the mapping between the retrieve listing and the spot filename
@@ -499,7 +499,7 @@ def start_retrieval(slot):
     # check whether any files actually need to be downloaded
     if len(retrieved_to_file_map) != 0:
 
-        print "  Start request for %s on slot %s" % (slot.tape_request, slot.pk)
+        print("  Start request for %s on slot %s" % (slot.tape_request, slot.pk))
         # send start notification email
         send_start_email(slot)
 
@@ -561,10 +561,10 @@ def check_happy(slot):
 
        :param integer slot: slot number to check
        """
-    print "Checking slot %s" % slot
+    print("Checking slot %s" % slot)
     if slot.tape_request.storaged_request_start is None:
         # no need to tidy up an unstarted process
-        print "No need to correct: not started yet."
+        print("No need to correct: not started yet.")
         return
 
     # look for files stuck in RESTORING state
@@ -572,25 +572,25 @@ def check_happy(slot):
         start_time = slot.tape_request.storaged_request_start.replace(tzinfo=utc)
         if start_time < datetime.datetime.now(utc) + datetime.timedelta(seconds=20):
             # no port or host ip and not started
-            print "Reset request: pid or host not set and not started for 20s."
+            print("Reset request: pid or host not set and not started for 20s.")
             redo_request(slot)
             return
         else:
             # wait for rest after 20 seconds
-            print "No need to correct: pid or host not sec, but less than 20s old."
+            print("No need to correct: pid or host not set, but less than 20s old.")
             return
 
     if slot.host_ip != socket.gethostbyname(socket.gethostname()):
         # can't reset from different machine
-        print "No need to correct: Not on right host."
+        print("No need to correct: Not on right host.")
         return
 
     # need to test pid on this machine
     if os.path.exists("/proc/%s" % slot.pid):
-        print "No need to correct: pid still running."
+        print("No need to correct: pid still running.")
         return
     else:
-        print "Reset request: pid not running."
+        print("Reset request: pid not running.")
         redo_request(slot)
         return
 
@@ -626,39 +626,39 @@ def run():
             if "process_requests" in l and not "/bin/sh" in l:
                 n_processes += 1
     except:
-	n_processes = 1
+        n_processes = 1
 
     if n_processes > STORAGED_SLOTS+1:   # this process counts as one move_files_to_nla process
-        print "Process already running {} transfers, exiting".format(STORAGED_SLOTS)
+        print("Process already running {} transfers, exiting".format(STORAGED_SLOTS))
         sys.exit()
 
     # update the requests to active / not active
-    print "Update requests"
+    print("Update requests")
     update_requests()
 
     # make right number of slots
-    print "Adjust slots"
+    print("Adjust slots")
     adjust_slots()
 
     # fill queue slots with requests
-    print "Load slots"
+    print("Load slots")
     load_slots()
 
-    print "Start retrieval runs for a slot"
+    print("Start retrieval runs for a slot")
 
     for slot in StorageDSlot.objects.all():
         if slot.tape_request is None:
-            print "  No request for slot %s" % slot.pk
+            print("  No request for slot %s" % slot.pk)
             continue
         elif slot.tape_request.active_request == False:
-            print "  Request for %s already active on slot %s" % (slot.tape_request, slot.pk)
+            print("  Request for %s already active on slot %s" % (slot.tape_request, slot.pk))
             check_happy(slot)
             continue
         else:
             # load storage paths to do path translation to from logical to storage paths.
-            print "  Process slot %s" % slot.pk
+            print("  Process slot %s" % slot.pk)
             TapeFile.load_storage_paths()
             if start_retrieval(slot):
                break
 
-    print "End retrieval run."
+    print("End retrieval run.")

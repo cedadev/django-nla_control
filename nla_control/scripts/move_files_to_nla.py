@@ -16,8 +16,8 @@
 
 from nla_control.models import TapeFile
 import os, sys
-import urllib2
-from nla_control.settings import *
+import requests
+from nla_site.settings import *
 import subprocess
 
 __author__ = 'sjp23'
@@ -30,11 +30,8 @@ def get_filesets():
        :return: A list of filesets that are marked as tape storage only.
        :rtype: List[string]
     """
-    # make opener
-    opener = urllib2.build_opener()
-
     # open download config - list os storage pots with logical paths
-    f = opener.open(ON_TAPE_URL)
+    f = requests.get(ON_TAPE_URL)
 
     filesets = f.readlines()
     filesets = map(lambda x: x.split()[2].strip(), filesets)
@@ -53,8 +50,8 @@ def run():
         n_processes = 0
         for l in lines:
             if "move_files_to_nla" in l and not "/bin/sh" in l:
-                print l
-                print "Process already running, exiting"
+                print(l)
+                print("Process already running, exiting")
                 n_processes += 1
     except:
         n_processes = 1
@@ -64,18 +61,17 @@ def run():
         filesets = get_filesets()
         for fs in filesets:
             for directory, dirs, files in os.walk(fs):
-                for f in files:                    
+                for f in files:
                     path = os.path.join(directory, f)
                     try:
                         if os.path.islink(path):
-                            print "Ignore Link:", path
+                            print("Ignore Link:", path)
                             continue
                         if os.path.getsize(path) < MIN_FILE_SIZE:
-                            print "Ignore Small:", path
+                            print("Ignore Small:", path)
                             continue
 
-                        print "Adding ", path
+                        print("Adding ", path)
                         TapeFile.add(path, os.path.getsize(path))
                     except:
-                        print "Could not add ", path
-
+                        print("Could not add ", path)

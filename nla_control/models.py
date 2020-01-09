@@ -100,7 +100,11 @@ class TapeFile(models.Model):
             line = line.strip()
             if line == '':
                 continue
-            spot_name, logical_path = line.split()
+            split_line = line.split()
+            if len(split_line) != 2:
+                continue
+            spot_name = split_line[0]
+            logical_path = split_line[1]
             TapeFile.fileset_logical_path_map[logical_path] = spot_name
             TapeFile.fileset_logical_paths.append(logical_path)
 
@@ -115,7 +119,11 @@ class TapeFile(models.Model):
             line = line.strip()
             if line == '':
                 continue
-            storage_path, spot_name = line.split()
+            split_line = line.split()
+            if len(split_line) == 0:
+                contine
+            storage_path = split_line[0]
+            spot_name = split_line[1]
             TapeFile.fileset_storage_path_map[spot_name] = storage_path
 
     def spotname(self):

@@ -8,7 +8,7 @@
 #
 # import nla objects
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 import nla_control
 import os
 import re
@@ -35,7 +35,7 @@ def set_restoring_files_to_ontape():
     for f in files:
         l_path = f.logical_path
         if not(os.path.exists(l_path)):
-            print "Resetting file " + l_path + " to ONTAPE"
+            print("Resetting file " + l_path + " to ONTAPE")
             f.stage = TapeFile.ONTAPE
             f.save()
 
@@ -45,7 +45,7 @@ def reset_stuck_taperequests():
     """
     taperequests = TapeRequest.objects.filter(active_request=True, storaged_request_end=None).exclude(storaged_request_start=None)
     for tr in taperequests:
-        print "Resetting request: " + tr.label
+        print("Resetting request: " + tr.label)
         tr.storaged_request_start = None
         tr.active_request = False
         tr.save()
@@ -54,7 +54,7 @@ def reset_stuck_taperequests():
 def deactivate_taperequests():
     taperequests = TapeRequest.objects.filter(active_request=True)
     for tr in taperequests:
-        print "Deactivate request: " + tr.label
+        print("Deactivate request: " + tr.label)
         tr.active_request = False
         tr.save()
 
@@ -126,7 +126,7 @@ def fix_missing_files():
         for f in tr.files.filter(Q(stage=TapeFile.RESTORED) | Q(stage=TapeFile.RESTORING)):
             if not os.path.exists(f.logical_path) and os.path.lexists(f.logical_path):
                 # unlink
-                print "Removing link to: " + f.logical_path
+                print("Removing link to: " + f.logical_path)
                 os.remove(f.logical_path)
                 # set the stage to "ONTAPE"
                 f.stage = TapeFile.ONTAPE
@@ -162,18 +162,18 @@ def fix_restore_links():
                         os.symlink(restore_path, tf.logical_path)
                         tf.stage = TapeFile.RESTORED
                         tf.save()
-                        print "LINKED: " + tf.logical_path + " & " + restore_path
+                        print("LINKED: " + tf.logical_path + " & " + restore_path)
                     except:
-                        print "FAILED TO LINK: " + tf.logical_path + " & " + restore_path
+                        print("FAILED TO LINK: " + tf.logical_path + " & " + restore_path)
                 else:
-                    print "RESTORE PATH DOES NOT EXIST: " + tf.logical_path + " & " + restore_path
+                    print("RESTORE PATH DOES NOT EXIST: " + tf.logical_path + " & " + restore_path)
                     if os.path.exists(tf.logical_path):
                         os.unlink(tf.logical_path)
                     tf.stage = TapeFile.ONTAPE
                     tf.restore_disk = None
                     tf.save()
             else:
-                print "LOGICAL PATH DOES NOT EXIST: " + tf.logical_path
+                print("LOGICAL PATH DOES NOT EXIST: " + tf.logical_path)
                 if os.path.islink(tf.logical_path):
                     os.unlink(tf.logical_path)
                 tf.stage = TapeFile.ONTAPE
@@ -204,14 +204,14 @@ def create_request_for_on_disk_files():
         now = datetime.datetime.now(utc)
         for tr in TapeRequest.objects.filter(retention__gte=now):
             if tf in tr.files.all():
-                print "Other request has requested this file.", tf.logical_path
+                print("Other request has requested this file.", tf.logical_path)
                 in_other_request = True
                 break
         qset = TapeRequest.objects.filter(files=tf)
         if len(qset) != 0:
             in_other_request = True
         if not in_other_request:
-            print tf.logical_path
+            print(tf.logical_path)
             tape_request.request_files += tf.logical_path + "\n"
 
     tape_request.save()
@@ -450,13 +450,13 @@ def run(*args):
     """
 
     if len(args) == 0:
-        print run.__doc__
+        print(run.__doc__)
 
     for a in args:
         if a == "-h" or a == "--help":
-            print run.__doc__
+            print(run.__doc__)
         method = globals().get(a)
         try:
             method()
         except Exception as e:
-            print "Failed running fix problem method: " + a + " " + str(e)
+            print("Failed running fix problem method: " + a + " " + str(e))
