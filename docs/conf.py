@@ -26,7 +26,7 @@ sys.path.append(os.path.abspath('_exts'))
 from django.conf import settings
 settings.configure()
 settings.INSTALLED_APPS = [
-    'nla_control', 
+    'nla_control',
     'cedaarchiveapp',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -111,7 +111,7 @@ todo_include_todos = False
 html_theme_path = [os.path.abspath('./themes')]
 
 #html_theme = "ceda-sphinx-theme"
-html_theme = "nature"
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
