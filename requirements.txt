@@ -1,4 +1,4 @@
-appdirs==1.4.4,
+appdirs==1.4.4
 Django==2.2.13
 django-sizefield==1.0.0
 django-extensions==3.0.5
