@@ -7,9 +7,8 @@ import glob
 import pytz
 import os
 import datetime
-import subprocess
 import sys
-from nla_site.settings import *
+from nla_control.settings import *
 
 # load storage paths to do path translation to from logical to storage paths.
 TapeFile.load_storage_paths()
@@ -55,17 +54,7 @@ def run(*args):
                       the associated checksum files. Output and appropriate
                       message with each of the filenames.
         """
-    # First of all check if the process is running - if it is then don't start running again
-    try:
-        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
-        n_processes = 0
-        for l in lines:
-            if "verify" in l and not "/bin/sh" in l:
-                print(l)
-                print("Process already running, exiting")
-                n_processes += 1
-    except:
-        n_processes = 1
+
 
     files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
     print("Number of UNVERIFIED files: " + str(len(files)))
@@ -176,7 +165,7 @@ def run(*args):
     for mf in missing_log_files:
         print("    {}".format(mf))
 
-    print()
+    print ()
     print ("Errors in log files")
     for ef in error_log_files:
         print("    {}".format(ef))

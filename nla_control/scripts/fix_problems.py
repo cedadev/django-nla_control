@@ -8,7 +8,7 @@
 #
 # import nla objects
 from nla_control.models import *
-from nla_site.settings import *
+from nla_control.settings import *
 import nla_control
 import os
 import re
@@ -18,15 +18,17 @@ from pytz import utc
 from django.db.models import Q
 import requests
 import subprocess
+from sizefield.utils import filesizeformat
 
 def clear_slots():
     """Remove all tasks from the slots directory"""
     for slot in StorageDSlot.objects.all():
-        # reset slot
-        slot.pid = None
-        slot.host_ip = None
-        slot.tape_request = None
-        slot.save()
+        # reset slot if pid is None
+        if slot.pid is None:
+            slot.pid = None
+            slot.host_ip = None
+            slot.tape_request = None
+            slot.save()
 
 def set_restoring_files_to_ontape():
     """Set all files that are stuck in a "RESTORING" state to "ONTAPE"
@@ -101,6 +103,7 @@ def fix_symbolic_links():
                         else:
                             f = f[0]
                         # link file to final archive location
+                        print(local_restored_path, f.logical_path)
                         if not os.path.exists(f.logical_path):
                             # os.path.exists returns false for broken links so delete the link
                             if os.path.islink(f.logical_path):
@@ -114,31 +117,31 @@ def fix_symbolic_links():
         log_file.close()
 
 
-def fix_missing_files():
+def fix_missing_links():
     """Due to errors, such as running the scripts as the wrong user(!), some links may be
        created to files that do not actually exist.
        This function removes the links and sets the file's status back to ONTAPE.  These files will
        then restore the files to the restore area if the files are part of a *TapeRequest*"""
-    # get all the tape requests and loop over them
-    tape_requests = TapeRequest.objects.all()
-    for tr in tape_requests:
-        # loop over the files which have been restored in the tape request
-        for f in tr.files.filter(Q(stage=TapeFile.RESTORED) | Q(stage=TapeFile.RESTORING)):
-            if not os.path.exists(f.logical_path) and os.path.lexists(f.logical_path):
-                # unlink
-                print("Removing link to: " + f.logical_path)
-                os.remove(f.logical_path)
-                # set the stage to "ONTAPE"
-                f.stage = TapeFile.ONTAPE
-                f.restore_disk = None
-                f.save()
-        # loop over any files that are ONDISK but actually missing
-        for f in tr.files.filter(stage=TapeFile.ONDISK):
-            if not os.path.exists(f.logical_path):
-                # set the stage to unverified
-                f.stage = TapeFile.UNVERIFIED
-                f.restore_disk = None
-                f.save()
+    # get all the restored and restoring files
+    tape_files = TapeFile.objects.filter(Q(stage=TapeFile.RESTORING) | Q(stage=TapeFile.RESTORED))
+    for f in tape_files:
+        if not os.path.exists(f.logical_path) and os.path.lexists(f.logical_path):
+            # unlink
+            print("Removing link to: " + f.logical_path)
+            os.remove(f.logical_path)
+            # set the stage to "ONTAPE"
+            f.stage = TapeFile.ONTAPE
+            f.restore_disk = None
+            f.save()
+    # loop over any files that are ONDISK but actually missing
+    tape_files = TapeFile.objects.filter(Q(stage=TapeFile.ONDISK))
+    for f in tape_files:
+        if not os.path.exists(f.logical_path):
+            print("File not found: " + f.logical_path)
+            # set the stage to unverified
+            f.stage = TapeFile.ONTAPE
+            f.restore_disk = None
+            f.save()
 
 
 def fix_restore_links():
@@ -275,6 +278,43 @@ def clean_up_restore_disk():
                             pass
                 fh.close()
 
+
+def clean_up_orphaned_files():
+    """Find any files that have not been cleaned up properly from the restore disks and delete
+    them if their status is ONTAPE."""
+    # get a mapping of spot to logical paths
+    spot_to_logical_path_mapping = get_spot_to_logical_path_mapping()
+    # loop over the restore disks
+    for rd in RestoreDisk.objects.all():
+        # walk the directories looking for files
+        archive_path = os.path.join(rd.mountpoint, 'archive')
+        spot_dirs = glob.glob(os.path.join(archive_path, "spot*"))
+        # loop over the spot dirs
+        for spot_dir in spot_dirs:
+            spot_name = os.path.basename(spot_dir)
+            for root, dirs, files in os.walk(spot_dir):
+                for fname in files:
+                    # build the logical path - add the extra sub directory if present (will not contain "spot")
+                    logical_root = spot_to_logical_path_mapping[spot_name]
+                    if not "spot" in os.path.basename(root):
+                        logical_root = os.path.join(logical_root, os.path.basename(root))
+                    logical_path = os.path.join(logical_root, fname)
+                    restored_path = os.path.join(root, fname)
+                    # check whether it's in the db
+                    try:
+                        tape_file = TapeFile.objects.get(logical_path=logical_path)
+                        if tape_file.stage == TapeFile.ONTAPE:
+                            if os.path.exists(logical_path):
+                                 print("Could not DELETE, link exists: " + str(logical_path))
+                            else:
+                                 print("DELETING: " + restored_path)
+                                 os.unlink(restored_path)
+                    except:
+                        print("Could not find record for " + restored_path)
+                        if os.path.exists(logical_path):
+                            print("Link exists: " + str(logical_path))
+
+
 def deactivate_all_taperequests():
     """Set active in all taperequests to false"""
     # get all the tape requests and loop over them
@@ -376,7 +416,7 @@ def reset_all_removed_files():
     if response.status_code != 200:
         raise Exception("Cannot find url: {}".format(ON_TAPE_URL))
     else:
-	page = response.text.split("\n")
+	    page = response.text.split("\n")
 
     print("Number of spots: {}".format(len(page)))
     stages = get_tape_stages()
@@ -431,6 +471,141 @@ def reset_all_removed_files():
                         print("Exception: ", str(e))
 
 
+def delete_broken_links():
+    """Find any symbolic links relating to the NLA where the file it points to is no longer there."""
+    tape_files = TapeFile.objects.filter(Q(stage=TapeFile.ONTAPE))
+    for tf in tape_files.iterator():
+        if os.path.lexists(tf.logical_path) and not os.path.exists(tf.logical_path):
+            # unlink the symbolic link
+            print("REMOVING broken symbolic link: {}".format(tf.logical_path))
+            os.unlink(tf.logical_path)
+
+
+def remove_empty_restore_directories():
+    """Find any empty directories in the restore area and delete them."""
+    for rd in RestoreDisk.objects.all():
+        # walk the directories looking for files
+        archive_path = os.path.join(rd.mountpoint, 'archive')
+        spot_dirs = glob.glob(os.path.join(archive_path, "spot*"))
+        # loop over the spot dirs
+        for spot_dir in spot_dirs:
+            for root, dirs, files in os.walk(spot_dir):
+                if len(files) == 0 and len(dirs) == 0:
+                    print("DELETING empty directory: " + root)
+                    os.rmdir(root)
+
+
+def recalculate_used_space():
+    """Recalculate the space used on the restore disks."""
+    for rd in RestoreDisk.objects.all():
+        rd.update()
+
+
+def delete_files_not_in_a_request():
+    """Delete those files that have the status of RESTORED but are actually not in a request"""
+    # build a list of RESTORED (or RESTORING) files from the requests
+    restored_files_tapereq = []
+    restored_file_size = 0
+    error_file_size = 0
+    for tr in TapeRequest.objects.iterator():
+        # list of request files
+        req_files = tr.request_files.split()
+        for rf in req_files:
+            try:
+                tf = TapeFile.objects.get(logical_path = rf)
+                if tf.stage == TapeFile.RESTORED or tf.stage == TapeFile.RESTORING:
+                    restored_files_tapereq.append(tf)
+                    restored_file_size += tf.size
+            except:
+                pass
+        # pattern match files
+        if tr.request_patterns != "":
+            pattern_files = TapeFile.objects.filter(
+                (Q(stage=TapeFile.RESTORED) |
+                 Q(stage=TapeFile.RESTORING)) &
+                Q(logical_path__contains=tr.request_patterns)
+            )
+            for pf in pattern_files.iterator():
+                restored_files_tapereq.append(pf)
+                restored_file_size += tf.size
+    # get a list of files that the NLA thinks have been restored
+    restored_files_nla = TapeFile.objects.filter(Q(stage=TapeFile.RESTORED) | Q(stage=TapeFile.RESTORING))
+    total_size = 0
+    for rf in restored_files_nla.iterator():
+        total_size += rf.size
+
+    print("Restored files in NLA             : {}".format(restored_files_nla.count()))
+    print("Restored files in requests        : {}".format(len(restored_files_tapereq)))
+    print("Size of restored files in NLA     : {}".format(filesizeformat(total_size)))
+    print("Size of restored files in requests: {}".format(filesizeformat(restored_file_size)))
+
+    # delete the files from the restore area and the symbolic link
+    for rf in restored_files_nla.iterator():
+        if rf not in restored_files_tapereq:
+            # delete the file
+            full_path = os.path.realpath(rf.logical_path)
+            print("DELETING {}".format(full_path))
+            os.unlink(full_path)
+            # delete the link
+            os.unlink(rf.logical_path)
+            # mark as on tape and save
+            rf.stage = TapeFile.ONTAPE
+            rf.save()
+            # add up errorneous sizes
+            error_file_size += rf.size
+
+    print("Size of deleted files: {}".format(filesizeformat(error_file_size)))
+
+
+def reset_unverified_files():
+    """Reset the status of unverified files to ONTAPE if they are not present
+       on the disk.  We should also check that they are on the tape as well."""
+
+    # we need the logical path to spot path mapping
+    TapeFile.load_storage_paths()
+
+    # find the unverified files that are not there
+    unverified_files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
+    count = 0
+    for uf in unverified_files:
+        if not os.path.exists(uf.logical_path):
+            print(uf.logical_path)
+            count += 1
+    print(count)
+
+
+def remove_migrated_files():
+    """When storage is decommissioned, the files will be removed from it.
+    If these are files that are restored by the NLA, then they will have
+    the status "RESTORED".  This function finds these files and restores
+    them to "ON_TAPE".
+    """
+    # find all the files on a particular restore disk that have stage==RESTORED
+    migrated_disk = "/datacentre/archvol2/pan74/nla_restore"
+    migrated_files = TapeFile.objects.filter(
+                         stage=TapeFile.RESTORED,
+                         restore_disk__mountpoint=migrated_disk
+                     )
+    for mf in migrated_files:
+        mf.stage=TapeFile.ONTAPE
+        print("Resetting {} to ONTAPE".format(mf.logical_path))
+        mf.save()
+        try:
+            os.unlink(mf.logical_path)
+        except OSError:
+            pass
+
+def reset_ontape_to_ondisk():
+    """Reset any files that are	marked as ONTAPE but actually appear on	the disk to ONDISK.
+       This is only if the file	is not a link."""
+    ontape_files = TapeFile.objects.filter(stage=TapeFile.ONTAPE)
+    for	of in ontape_files:
+       	if os.path.exists(of.logical_path) and not os.path.islink(of.logical_path):
+       	    print("Reset {} to ONDISK".format(of.logical_path))
+            of.stage = TapeFile.ONDISK
+            of.save()
+
+
 def run(*args):
     """Entry point for the Django script run via ``./manage.py runscript``
    Arguments (passed via --script-args) will run the corresponding function
@@ -441,12 +616,21 @@ def run(*args):
        reset_stuck_taperequests
        deactivate_taperequests
        fix_symbolic_links
+       fix_missing_links
        create_request_for_on_disk_files
        clean_up_restore_disk
+       clean_up_orphaned_files
        deactivate_all_taperequests
        reset_files_no_verify_date
        reset_removed_files
        reset_all_removed_files
+       delete_broken_links
+       remove_empty_restore_directories
+       recalculate_used_space
+       delete_files_not_in_a_request
+       reset_unverified_files
+       remove_migrated_files
+       reset_ontape_to_ondisk
     """
 
     if len(args) == 0:

@@ -18,7 +18,7 @@ convert the state of all of these files from ON_DISK to ON_TAPE.
 
 # import nla objects
 from nla_control.models import *
-from nla_site.settings import *
+from nla_control.settings import *
 import datetime
 import pytz
 
@@ -56,3 +56,4 @@ def run():
         tape_request.delete()
     else:
         tape_request.save()
+    

@@ -13,9 +13,10 @@
 from nla_control.models import TapeFile, TapeRequest
 import datetime
 from pytz import utc
-from nla_site.settings import *
-from nla_control.scripts.process_requests import update_requests
-from ceda_elasticsearch_tools.core.updater import ElasticsearchQuery, ElasticsearchUpdater
+from nla_control.settings import *
+from process_requests import update_requests
+from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi, CedaEo
+import subprocess
 
 __author__ = 'sjp23'
 
@@ -44,16 +45,26 @@ def tidy_requests():
     """
     # Update the files portion of the tape request with those present in the NLA
     now = datetime.datetime.now(utc)
+    print("Searching for expired tape requests")
     tape_requests = TapeRequest.objects.filter(retention__lt=now)
-
+    print("Number of tape requests: ", tape_requests.count())
     print("Updating tape requests")
     for tr in tape_requests:
-        print(tr)
+        print("Tape request: {}".format(tr))
         request_files = tr.request_files.split()
-        present_tape_files = TapeFile.objects.filter(logical_path__in=request_files)
-        if len(present_tape_files) != 0:
-            tr.files = present_tape_files.all()
-            tr.save()
+        n_rf = len(request_files)
+
+        # split the request files up into batches of 1000
+        n_per_batch = 100000
+        tr.files.clear()
+        for i in range(0, n_rf/n_per_batch+1):
+            batch_files = request_files[i*n_per_batch:(i+1)*n_per_batch]
+            print("Processing {}/{}".format(i*len(batch_files), n_rf))
+            present_tape_files = TapeFile.objects.filter(logical_path__in=batch_files)
+            if len(present_tape_files) != 0:
+                pf = list(present_tape_files.all())
+                tr.files.add(*pf)
+                tr.save()
 
     print("Tidying tape requests: find tape requests...")
     for tr in tape_requests:
@@ -65,9 +76,9 @@ def tidy_requests():
             # Check if the file does not exist on the disk anymore - but only remove it if it is still in a restored state
             if not os.path.exists(f.logical_path):
                 if f.stage == TapeFile.RESTORED:
-                    print("File requests exists, but file is not on the disk.) Removing file from NLA:", f.logical_path)
-                    f.delete()
-                    continue
+                    print("File requests exists, but file is not on the disk. Removing file from NLA:", f.logical_path)
+                    #f.delete()
+                continue
             file_mod = datetime.datetime.fromtimestamp(os.path.getmtime(f.logical_path), utc)
             if f.verified:
                 tr_f_mod = f.verified.replace(tzinfo=file_mod.tzinfo)
@@ -144,13 +155,13 @@ def tidy_requests():
 
         print("Setting status of files in Elastic Search to not on disk")
         try:
-            # Get params and query
-            params, query = ElasticsearchQuery.ceda_fbs()
             # Open connection to index and update files
-            ElasticsearchUpdater(index="ceda-level-1",
-                                 host="jasmin-es1.ceda.ac.uk",
-                                 port=9200
-                                 ).update_location(file_list=removed_files, params=params, search_query=query, on_disk=False)
+            if len(removed_files) > 0:
+                fbi = CedaFbi(
+                        host_url="https://jasmin-es1.ceda.ac.uk",
+                        http_auth=("nla", "hOZrb!(>VkJ-h=q[")
+                      )
+                fbi.update_file_location(file_list=removed_files, on_disk=False)
             print("Updated Elastic Search index for files ",)
             for f in removed_files:
                 print(" - " + str(f))
@@ -165,15 +176,18 @@ def tidy_requests():
 def run():
     """Entry point for the Django script run via ``./manage.py runscript``"""
     # First of all check if the process is running - if it is then don't start running again
+    print("Starting tidy_requests")
     try:
         lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
         n_processes = 0
         for l in lines:
             if "tidy_requests" in l and not "/bin/sh" in l:
                 print(l)
-                print("Process already running, exiting")
-                n_processes += 1
+        if n_processes == 1:
+            print("Process already running, exiting")
+            n_processes += 1
     except:
         n_processes = 1
-
-    tidy_requests()
+    if n_processes == 1:   # this process counts as one move_files_to_nla process
+        tidy_requests()
+    print("Finished tidy_requests")

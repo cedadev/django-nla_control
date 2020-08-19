@@ -78,6 +78,8 @@ class TapeFile(models.Model):
     __CHOICES = ((ONTAPE, 'On tape'), (RESTORING, 'Restoring'),
                  (ONDISK, 'On Disk'), (UNVERIFIED, 'Unverified'), (RESTORED, 'Restored'))
 
+    STAGE_NAMES = ["UNVERIFIED", "ON TAPE", "restoring", "on disk", "D", "RESTORED"]
+
     logical_path = models.CharField(max_length=2024, help_text='logical path of archived files e.g. /badc/acsoe/file10.dat', db_index=True)
     size = FileSizeField(help_text='size of file in bytes')
     verified = models.DateTimeField(blank=True, null=True, help_text="Checked tape copy is same as disk copy")
@@ -85,7 +87,7 @@ class TapeFile(models.Model):
 
     # which restore disk is the restored file on?
     restore_disk = models.ForeignKey(RestoreDisk, blank=True, null=True,
-                                     on_delete=models.CASCADE)
+                                     on_delete=models.SET_NULL)
 
     @staticmethod
     def load_storage_paths():
@@ -100,18 +102,14 @@ class TapeFile(models.Model):
             line = line.strip()
             if line == '':
                 continue
-            split_line = line.split()
-            if len(split_line) != 2:
-                continue
-            spot_name = split_line[0]
-            logical_path = split_line[1]
+            spot_name, logical_path = line.split()
             TapeFile.fileset_logical_path_map[logical_path] = spot_name
             TapeFile.fileset_logical_paths.append(logical_path)
 
         # reverse sort the logical paths so that longer paths match first
         TapeFile.fileset_logical_paths.sort(reverse=True)
 
-        page = requests.get(STORAGE_PATHS_URL)
+        page = opener.open(STORAGE_PATHS_URL)
         TapeFile.fileset_storage_path_map = {}
 
         # make a dictionary that maps spot names to storage paths
@@ -119,11 +117,7 @@ class TapeFile(models.Model):
             line = line.strip()
             if line == '':
                 continue
-            split_line = line.split()
-            if len(split_line) == 0:
-                contine
-            storage_path = split_line[0]
-            spot_name = split_line[1]
+            storage_path, spot_name = line.split()
             TapeFile.fileset_storage_path_map[spot_name] = storage_path
 
     def spotname(self):
@@ -163,7 +157,7 @@ class TapeFile(models.Model):
         return os.path.dirname(self.storage_path())
 
     def __unicode__(self):
-        return "%s (%s)" % (self.logical_path, self.stage)
+        return "{} ({})".format(self.logical_path, TapeFile.STAGE_NAMES[self.stage])
 
     def match(self, pattern):
         """Return whether the logical path of this TapeFile matches the input pattern (a UNIX filesystem pattern).
@@ -257,7 +251,7 @@ class TapeRequest(models.Model):
     label = models.CharField(blank=True, null=True, max_length=2024,
                                            help_text="Human readable label for request")
     quota = models.ForeignKey(Quota, help_text="User Quota for request",
-                              on_delete=models.CASCADE)
+                              on_delete=models.PROTECT)
     retention = models.DateTimeField(blank=True, null=True, db_index=True)
     request_date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     active_request = models.BooleanField(default=False)
@@ -344,8 +338,11 @@ class StorageDSlot(models.Model):
        :var models.CharField host_ip: IP address of host originating the call to sd_get
        :var models.CharField request_dir: temporary directory for files retrieved from sd_get call
        """
-    tape_request = models.ForeignKey(TapeRequest, on_delete=models.SET_NULL, blank=True, null=True,
-                                     help_text="Request being dealt with by storageD")
+    tape_request = models.ForeignKey(
+                    TapeRequest, on_delete=models.SET_NULL,
+                    blank=True, null=True,
+                    help_text="Request being dealt with by storageD",
+                )
     pid = models.IntegerField(blank=True, null=True, help_text="Process id for queue request")
     #  ip adress added anticipating using many hosts for retrives
     host_ip = models.CharField(blank=True, null=True, max_length=50, help_text="ip address for the process")

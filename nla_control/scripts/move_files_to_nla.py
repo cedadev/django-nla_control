@@ -17,7 +17,7 @@
 from nla_control.models import TapeFile
 import os, sys
 import requests
-from nla_site.settings import *
+from nla_control.settings import *
 import subprocess
 
 __author__ = 'sjp23'
@@ -31,9 +31,8 @@ def get_filesets():
        :rtype: List[string]
     """
     # open download config - list os storage pots with logical paths
-    f = requests.get(ON_TAPE_URL)
+    filesets = requests.get(ON_TAPE_URL)
 
-    filesets = f.readlines()
     filesets = map(lambda x: x.split()[2].strip(), filesets)
     return filesets
 

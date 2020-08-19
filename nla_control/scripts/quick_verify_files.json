@@ -1,0 +1,9 @@
+{
+    "match_logical_path" : [
+        "/neodc/sentinel2a",
+        "/neodc/sentinel2b",
+        "/neodc/sentinel1a",
+        "/neodc/sentinel1b",
+        "/badc/cascade"
+    ]
+}

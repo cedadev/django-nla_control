@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render_to_response, get_object_or_404
 import json
 import datetime
 from django.views.generic import View
+import requests
 
 class RequestView(View):
     """:rest-api
@@ -669,9 +670,7 @@ class TapeFileView(View):
 
         # load tape file mappings if spot is true
         if spot.lower() == "true":
-            opener = urllib2.build_opener()
-
-            page = opener.open(CEDA_DOWNLOAD_CONF)
+            page = requests.get(CEDA_DOWNLOAD_CONF)
             fileset_logical_path_map = {}
 
             # make a dictionary that maps logical paths to spot names
@@ -711,15 +710,12 @@ class TapeFileView(View):
 
 
 def unverified_spots(request):
-    """Get a list of unverified spots, in a similar manner as the "get" method above but just returning a 
+    """Get a list of unverified spots, in a similar manner as the "get" method above but just returning a
        text file that can be more easily processed"""
     # get a list of unverified files
     unv_files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
 
-    # build a mapping of filenames to spots
-    opener = urllib2.build_opener()
-
-    page = opener.open(CEDA_DOWNLOAD_CONF)
+    page = requests.get(CEDA_DOWNLOAD_CONF)
     fileset_logical_path_map = {}
 
     # make a dictionary that maps logical paths to spot names

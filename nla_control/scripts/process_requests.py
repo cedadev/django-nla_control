@@ -17,7 +17,7 @@
 
 # import nla objects
 from nla_control.models import *
-from nla_site.settings import *
+from nla_control.settings import *
 import nla_control
 
 from django.core.mail import send_mail
@@ -32,7 +32,7 @@ import socket
 from pytz import utc
 import sys, os
 
-from ceda_elasticsearch_tools.core.updater import ElasticsearchQuery, ElasticsearchUpdater
+from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi, CedaEo
 
 def update_requests():
     """Update all of the *TapeRequests* in the NLA system and mark *TapeRequests* as active or inactive.
@@ -65,6 +65,8 @@ def update_requests():
             r.save()
             continue
         if r.quota.user == "_VERIFY":
+            if r.label == "FROM QUICK_VERIFY PROCESS":
+                continue
             # Special case for verify to speed up process_requests
             request_files = r.request_files.split()
             present_tape_files = TapeFile.objects.filter(Q(stage=TapeFile.UNVERIFIED) & Q(logical_path__in=request_files))
@@ -255,7 +257,11 @@ def send_end_email(slot):
 def get_spot_contents(spot_name):
     """Get a list of the files in the spot `spot_name`"""
     sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
-    output = subprocess.check_output(sd_cmd)
+    try:
+        output = subprocess.check_output(sd_cmd)
+    except subprocess.CalledProcessError:
+        return []
+
     out_lines = output.split("\n")
     spot_files = []
     for out_item in out_lines:
@@ -409,13 +415,23 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
                 # move the retrieved file back to archive area.
                 f = retrieved_to_file_map[restored_archive_file_path]
                 # link file to final archive location
-                if not os.path.exists(f.logical_path):
-                    os.symlink(local_restored_path, f.logical_path)
-                # set the first files on disk if not already set
-                if slot.tape_request.first_files_on_disk is None:
-                    slot.tape_request.first_files_on_disk = datetime.datetime.utcnow()
-                f.stage = TapeFile.RESTORED
-                f.save()
+                try:
+                    if os.path.exists(f.logical_path):
+                        if os.path.islink(f.logical_path):
+                            os.unlink(f.logical_path)
+                            os.symlink(local_restored_path, f.logical_path)
+                        else:
+                            raise Exception("File exists and is not a link".format(f.logical_path))
+                    else:
+                        os.symlink(local_restored_path, f.logical_path)
+                except:
+                    print("Could not create symlink from {} to {}".format(f.logical_path, local_restored_path))
+                else:
+                    # set the first files on disk if not already set
+                    if slot.tape_request.first_files_on_disk is None:
+                        slot.tape_request.first_files_on_disk = datetime.datetime.utcnow()
+                    f.stage = TapeFile.RESTORED
+                    f.save()
                 # update the restore_disk
                 target_disk.update()
                 # add the filename to the restored filenames
@@ -423,17 +439,14 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
         # modify the restored files in elastic search
         try:
             if len(restored_files) > 0:
-                # Get params and query
-                params, query = ElasticsearchQuery.ceda_fbs()
-                # Open connection to index and update files
-                ElasticsearchUpdater(index="ceda-level-1",
-                                     host="jasmin-es1.ceda.ac.uk",
-                                     port=9200
-                                     ).update_location(file_list=restored_files, params=params, search_query=query, on_disk=True)
-
-                print("Updated Elastic Search index for files ",)
-                for f in restored_files:
-                    print(" - " + str(f))
+                fbi = CedaFbi(
+                        host_url="https://jasmin-es1.ceda.ac.uk",
+                        http_auth=("nla", "hOZrb!(>VkJ-h=q[")
+                      )
+                fbi.update_file_location(file_list=restored_files, on_disk=True)
+                #print "Updated Elastic Search index for files ",
+                #for f in restored_files:
+                #    print " - " + str(f)
         except Exception as e:
             print("Failed updating Elastic Search Index ",)
             print(e, restored_files)
@@ -500,18 +513,21 @@ def start_retrieval(slot):
     if len(retrieved_to_file_map) != 0:
 
         print("  Start request for %s on slot %s" % (slot.tape_request, slot.pk))
-        # send start notification email
-        send_start_email(slot)
+        # send start notification email if no files retrieved
+        if slot.tape_request.files.filter(stage=TapeFile.RESTORED).count() == 0:
+            send_start_email(slot)
 
         # start the sd_get_process
         p, log_file_name = start_sd_get(slot, file_listing_filename, target_disk)
 
         wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map)
 
+        # request ended - send ended email if there are no files in the request left ONTAPE or RESTORING
+        if slot.tape_request.files.filter(Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING)).count() == 0:
+            send_end_email(slot)
+
         # if got all the files then mark slot as empty
         if slot.tape_request.files.filter(stage=TapeFile.RESTORING).count() == 0:
-            # request ended - send ended email
-            send_end_email(slot)
             complete_request(slot)
         else:
             redo_request(slot)
@@ -577,7 +593,7 @@ def check_happy(slot):
             return
         else:
             # wait for rest after 20 seconds
-            print("No need to correct: pid or host not set, but less than 20s old.")
+            print("No need to correct: pid or host not sec, but less than 20s old.")
             return
 
     if slot.host_ip != socket.gethostbyname(socket.gethostname()):
@@ -626,10 +642,10 @@ def run():
             if "process_requests" in l and not "/bin/sh" in l:
                 n_processes += 1
     except:
-        n_processes = 1
+	    n_processes = 1
 
-    if n_processes > STORAGED_SLOTS+1:   # this process counts as one move_files_to_nla process
-        print("Process already running {} transfers, exiting".format(STORAGED_SLOTS))
+    if n_processes > MAX_PROCESSES+1:   # this process counts as one process_requests processx
+        print("Process already running {} transfers, exiting".format(MAX_PROCESSES))
         sys.exit()
 
     # update the requests to active / not active

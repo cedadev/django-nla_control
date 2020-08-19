@@ -36,5 +36,5 @@ class RestoreDiskAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ('mountpoint', 'formatted_allocated', 'formatted_used')
     search_fields = ('mountpoint',)
-    readonly_fields = ('used_bytes',)
+#    readonly_fields = ('used_bytes',)
 admin.site.register(RestoreDisk, RestoreDiskAdmin)
