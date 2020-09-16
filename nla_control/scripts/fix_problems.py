@@ -376,7 +376,7 @@ def reset_removed_files():
         print("Working on spot: ", spot_name, )
         sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
         print("... sd_ls completed")
-        output = subprocess.check_output(sd_cmd)
+        output = subprocess.check_output(sd_cmd).decode("utf-8")
         out_lines = output.split("\n")
         for out_item in out_lines:
             out_file = out_item.split()
@@ -416,7 +416,7 @@ def reset_all_removed_files():
     if response.status_code != 200:
         raise Exception("Cannot find url: {}".format(ON_TAPE_URL))
     else:
-	    page = response.text.split("\n")
+        page = response.text.split("\n")
 
     print("Number of spots: {}".format(len(page)))
     stages = get_tape_stages()
@@ -430,7 +430,7 @@ def reset_all_removed_files():
         print("Checking: ", spot_name)
         try:
             sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
-            output = subprocess.check_output(sd_cmd)
+            output = subprocess.check_output(sd_cmd).decode("utf-8")
         except KeyboardInterrupt:
             raise
         except Exception as e:

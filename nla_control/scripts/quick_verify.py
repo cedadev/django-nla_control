@@ -109,7 +109,7 @@ def run(*args):
             spot_lists[spot_name] = []
             sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
             try:
-                output = subprocess.check_output(sd_cmd)
+                output = subprocess.check_output(sd_cmd).decode("utf-8")
        	    except subprocess.CalledProcessError:
        	       	print("Spot name: {} not found by sd_ls".format(spot_name))
        	       	continue

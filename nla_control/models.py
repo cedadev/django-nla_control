@@ -93,13 +93,19 @@ class TapeFile(models.Model):
     def load_storage_paths():
         """Load the fileset logical paths to spotname mappings by retrieving the spotnames from a URL,
            finding the corresponding logical path for the spot and reformatiing them into a dictionary"""
-        page = requests.get(CEDA_DOWNLOAD_CONF)
+
+        response = requests.get(CEDA_DOWNLOAD_CONF)
+        if response.status_code != 200:
+            raise Exception("Cannot find url: {}".format(CEDA_DOWNLOAD_CONF))
+        else:
+            page = response.text.split("\n")
+
         TapeFile.fileset_logical_path_map = {}
         TapeFile.fileset_logical_paths = []
 
         # make a dictotionary that maps logical paths to spot names
         for line in page:
-            line = line.strip()
+            line = str(line.strip())
             if line == '':
                 continue
             spot_name, logical_path = line.split()
@@ -109,7 +115,12 @@ class TapeFile(models.Model):
         # reverse sort the logical paths so that longer paths match first
         TapeFile.fileset_logical_paths.sort(reverse=True)
 
-        page = opener.open(STORAGE_PATHS_URL)
+        response = requests.get(STORAGE_PATHS_URL)
+        if response.status_code != 200:
+            raise Exception("Cannot find url: {}".format(STORAGE_PATHS_URL))
+        else:
+            page = response.text.split("\n")
+
         TapeFile.fileset_storage_path_map = {}
 
         # make a dictionary that maps spot names to storage paths

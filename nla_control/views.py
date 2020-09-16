@@ -670,7 +670,8 @@ class TapeFileView(View):
 
         # load tape file mappings if spot is true
         if spot.lower() == "true":
-            page = requests.get(CEDA_DOWNLOAD_CONF)
+            req = requests.get(CEDA_DOWNLOAD_CONF)
+            page = req.content.decode("utf-8")
             fileset_logical_path_map = {}
 
             # make a dictionary that maps logical paths to spot names
@@ -715,7 +716,8 @@ def unverified_spots(request):
     # get a list of unverified files
     unv_files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
 
-    page = requests.get(CEDA_DOWNLOAD_CONF)
+    req = requests.get(CEDA_DOWNLOAD_CONF)
+    page = req.content.decode("utf-8")
     fileset_logical_path_map = {}
 
     # make a dictionary that maps logical paths to spot names
