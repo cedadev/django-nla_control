@@ -21,6 +21,7 @@ setup(
         'pyparsing',
         'pytz',
         'requests',
+        'tqdm'
     ],
     include_package_data=True,
     license='my License',  # example license
