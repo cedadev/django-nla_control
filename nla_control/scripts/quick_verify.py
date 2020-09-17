@@ -55,7 +55,7 @@ def run(*args):
         sys.exit()
 
     # open the JSON file containing the directories to match against
-    with open("/usr/local/nla_server/NLA/nla_control/scripts/quick_verify_files.json") as fh:
+    with open("/usr/local/NLA/src/nla_control/nla_control/scripts/quick_verify_files.json") as fh:
         lpath_json = json.load(fh)
 
     # build a Q query with each logical path mapping
