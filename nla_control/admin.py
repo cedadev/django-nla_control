@@ -5,10 +5,11 @@ from nla_control.models import *
 
 class TapeFileAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('logical_path', 'formatted_size', 'stage', 'verified')
+    list_display = ('formatted_logical_path', 'formatted_size', 'stage', 'verified')
     search_fields = ('logical_path',)
     list_filter = ('stage',)
-    readonly_fields = ('logical_path', 'size')
+    fields = ('formatted_logical_path', 'verified', 'stage', 'restore_disk', 'formatted_size')
+    readonly_fields = ('formatted_logical_path', 'formatted_size')
 admin.site.register(TapeFile, TapeFileAdmin)
 
 class TapeReqAdmin(admin.ModelAdmin):

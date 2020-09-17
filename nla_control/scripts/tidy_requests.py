@@ -14,8 +14,8 @@ from nla_control.models import TapeFile, TapeRequest
 import datetime
 from pytz import utc
 from nla_control.settings import *
-from process_requests import update_requests
-from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi, CedaEo
+from nla_control.scripts.process_requests import update_requests
+from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
 import subprocess
 
 __author__ = 'sjp23'
@@ -57,7 +57,7 @@ def tidy_requests():
         # split the request files up into batches of 1000
         n_per_batch = 100000
         tr.files.clear()
-        for i in range(0, n_rf/n_per_batch+1):
+        for i in range(0, int(n_rf/n_per_batch+1)):
             batch_files = request_files[i*n_per_batch:(i+1)*n_per_batch]
             print("Processing {}/{}".format(i*len(batch_files), n_rf))
             present_tape_files = TapeFile.objects.filter(logical_path__in=batch_files)
@@ -151,7 +151,7 @@ def tidy_requests():
                     print("Could not remove from archive: ", f.logical_path)
 
             # add to list of files to be altered in Elastic Search
-            removed_files.append(f.logical_path)
+            removed_files.append(f.logical_path.encode("utf-8"))
 
         print("Setting status of files in Elastic Search to not on disk")
         try:

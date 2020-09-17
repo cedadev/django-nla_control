@@ -22,6 +22,10 @@ class RestoreDisk(models.Model):
                                     help_text="Maximum size on the disk that can be allocated to the restore area")
     used_bytes = FileSizeField(default=0,
                                help_text="Used value calculated by update method")
+
+    def __str__(self):
+        return self.__unicode__()
+
     def __unicode__(self):
         return "%s" % self.mountpoint
 
@@ -93,13 +97,19 @@ class TapeFile(models.Model):
     def load_storage_paths():
         """Load the fileset logical paths to spotname mappings by retrieving the spotnames from a URL,
            finding the corresponding logical path for the spot and reformatiing them into a dictionary"""
-        page = requests.get(CEDA_DOWNLOAD_CONF)
+
+        response = requests.get(CEDA_DOWNLOAD_CONF)
+        if response.status_code != 200:
+            raise Exception("Cannot find url: {}".format(CEDA_DOWNLOAD_CONF))
+        else:
+            page = response.text.split("\n")
+
         TapeFile.fileset_logical_path_map = {}
         TapeFile.fileset_logical_paths = []
 
         # make a dictotionary that maps logical paths to spot names
         for line in page:
-            line = line.strip()
+            line = str(line.strip())
             if line == '':
                 continue
             spot_name, logical_path = line.split()
@@ -109,7 +119,12 @@ class TapeFile(models.Model):
         # reverse sort the logical paths so that longer paths match first
         TapeFile.fileset_logical_paths.sort(reverse=True)
 
-        page = opener.open(STORAGE_PATHS_URL)
+        response = requests.get(STORAGE_PATHS_URL)
+        if response.status_code != 200:
+            raise Exception("Cannot find url: {}".format(STORAGE_PATHS_URL))
+        else:
+            page = response.text.split("\n")
+
         TapeFile.fileset_storage_path_map = {}
 
         # make a dictionary that maps spot names to storage paths
@@ -156,8 +171,11 @@ class TapeFile(models.Model):
         """
         return os.path.dirname(self.storage_path())
 
+    def __str__(self):
+        return self.__unicode__()
+
     def __unicode__(self):
-        return "{} ({})".format(self.logical_path, TapeFile.STAGE_NAMES[self.stage])
+        return "%s (%s)" % (self.logical_path, TapeFile.STAGE_NAMES[self.stage])
 
     def match(self, pattern):
         """Return whether the logical path of this TapeFile matches the input pattern (a UNIX filesystem pattern).
@@ -184,6 +202,13 @@ class TapeFile(models.Model):
         return filesizeformat(self.size)
     formatted_size.short_description = "size"
 
+    def formatted_logical_path(self):
+        slp = str(self.logical_path)
+        if slp[0] == 'b':
+            return slp[2:-1]
+        else:
+            return slp
+    formatted_logical_path.short_description = "logical_path"
 
 class Quota(models.Model):
     """Users quota for tape requests
@@ -198,6 +223,9 @@ class Quota(models.Model):
     size = FileSizeField(help_text='size of quota in bytes')
     email_address = models.CharField(max_length=2024, blank=True, null=True, help_text='email address of user for notifications')
     notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.__unicode__()
 
     def __unicode__(self):
         return "%s (%s)" % (self.user, filesizeformat(self.size))
@@ -267,6 +295,9 @@ class TapeRequest(models.Model):
                                             help_text="email to notify on first files")
     notify_on_last_file = models.CharField(blank=True, null=True, max_length=2024,
                                            help_text="email to notify on last files")
+
+    def __str__(self):
+        return self.__unicode__()
 
     def __unicode__(self):
         try:

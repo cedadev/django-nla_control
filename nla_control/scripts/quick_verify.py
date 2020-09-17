@@ -55,7 +55,7 @@ def run(*args):
         sys.exit()
 
     # open the JSON file containing the directories to match against
-    with open("/usr/local/nla_server/NLA/nla_control/scripts/quick_verify_files.json") as fh:
+    with open("/usr/local/NLA/src/nla_control/nla_control/scripts/quick_verify_files.json") as fh:
         lpath_json = json.load(fh)
 
     # build a Q query with each logical path mapping
@@ -109,7 +109,7 @@ def run(*args):
             spot_lists[spot_name] = []
             sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
             try:
-                output = subprocess.check_output(sd_cmd)
+                output = subprocess.check_output(sd_cmd).decode("utf-8")
        	    except subprocess.CalledProcessError:
        	       	print("Spot name: {} not found by sd_ls".format(spot_name))
        	       	continue

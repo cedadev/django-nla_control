@@ -32,7 +32,7 @@ import socket
 from pytz import utc
 import sys, os
 
-from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi, CedaEo
+from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
 
 def update_requests():
     """Update all of the *TapeRequests* in the NLA system and mark *TapeRequests* as active or inactive.
@@ -258,7 +258,7 @@ def get_spot_contents(spot_name):
     """Get a list of the files in the spot `spot_name`"""
     sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
     try:
-        output = subprocess.check_output(sd_cmd)
+        output = subprocess.check_output(sd_cmd).decode("utf-8")
     except subprocess.CalledProcessError:
         return []
 
@@ -357,6 +357,7 @@ def start_sd_get(slot, file_listing_filename, target_disk):
 
     # start storage-D process and record pid and host
     p = subprocess.Popen(sd_get_cmd)
+    print(file_listing_filename)
     slot.host_ip = socket.gethostbyname(socket.gethostname())
     slot.pid = p.pid
     slot.save()
@@ -435,7 +436,7 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
                 # update the restore_disk
                 target_disk.update()
                 # add the filename to the restored filenames
-                restored_files.append(f.logical_path)
+                restored_files.append(f.logical_path.encode("utf-8"))
         # modify the restored files in elastic search
         try:
             if len(restored_files) > 0:
@@ -660,6 +661,9 @@ def run():
     print("Load slots")
     load_slots()
 
+    # flag whether storage paths are loaded
+    spaths_loaded = False
+
     print("Start retrieval runs for a slot")
 
     for slot in StorageDSlot.objects.all():
@@ -673,7 +677,11 @@ def run():
         else:
             # load storage paths to do path translation to from logical to storage paths.
             print("  Process slot %s" % slot.pk)
-            TapeFile.load_storage_paths()
+            if not spaths_loaded:
+                print("Load storage paths")
+                TapeFile.load_storage_paths()
+                spaths_loaded = True
+
             if start_retrieval(slot):
                break
 
