@@ -45,7 +45,7 @@ def run():
 
     # First of all check if the process is running - if it is then don't start running again
     try:
-        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
+        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).decode("utf-8").split("\n")
         n_processes = 0
         for l in lines:
             if "move_files_to_nla" in l and not "/bin/sh" in l:

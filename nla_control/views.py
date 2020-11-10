@@ -717,7 +717,7 @@ def unverified_spots(request):
     unv_files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
 
     req = requests.get(CEDA_DOWNLOAD_CONF)
-    page = req.content.decode("utf-8")
+    page = req.text.split("\n")
     fileset_logical_path_map = {}
 
     # make a dictionary that maps logical paths to spot names

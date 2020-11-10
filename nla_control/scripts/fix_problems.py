@@ -9,16 +9,21 @@
 # import nla objects
 from nla_control.models import *
 from nla_control.settings import *
+from nla_control.scripts.tidy_requests import in_other_request
 import nla_control
 import os
 import re
 import datetime
 import glob
+import sys
 from pytz import utc
 from django.db.models import Q
 import requests
 import subprocess
 from sizefield.utils import filesizeformat
+
+global pk
+pk=None
 
 def clear_slots():
     """Remove all tasks from the slots directory"""
@@ -33,7 +38,11 @@ def clear_slots():
 def set_restoring_files_to_ontape():
     """Set all files that are stuck in a "RESTORING" state to "ONTAPE"
     """
-    files = TapeFile.objects.filter(stage=TapeFile.RESTORING)
+    if pk == None:
+        files = TapeFile.objects.filter(stage=TapeFile.RESTORING)
+    else:
+        req = TapeRequest.objects.get(pk=pk)
+        files = req.files.filter(stage=TapeFile.RESTORING)
     for f in files:
         l_path = f.logical_path
         if not(os.path.exists(l_path)):
@@ -139,7 +148,7 @@ def fix_missing_links():
         if not os.path.exists(f.logical_path):
             print("File not found: " + f.logical_path)
             # set the stage to unverified
-            f.stage = TapeFile.ONTAPE
+            f.stage = TapeFile.UNVERIFIED
             f.restore_disk = None
             f.save()
 
@@ -201,19 +210,16 @@ def create_request_for_on_disk_files():
 
     # get a list of files that are ONDISK
     tape_files = TapeFile.objects.filter(stage=TapeFile.ONDISK)
+    in_other_req = False
     for tf in tape_files:
         # check whether this file is in another request
-        in_other_request = False
-        now = datetime.datetime.now(utc)
-        for tr in TapeRequest.objects.filter(retention__gte=now):
-            if tf in tr.files.all():
-                print("Other request has requested this file.", tf.logical_path)
-                in_other_request = True
-                break
+        if in_other_request(tape_request, tf):
+            in_other_req = True
+            break
         qset = TapeRequest.objects.filter(files=tf)
         if len(qset) != 0:
-            in_other_request = True
-        if not in_other_request:
+            in_other_req = True
+        if not in_other_req:
             print(tf.logical_path)
             tape_request.request_files += tf.logical_path + "\n"
 
@@ -307,7 +313,7 @@ def clean_up_orphaned_files():
                             if os.path.exists(logical_path):
                                  print("Could not DELETE, link exists: " + str(logical_path))
                             else:
-                                 print("DELETING: " + restored_path)
+                                 print("DELETING: " + restored_path + " with logical path " + str(logical_path))
                                  os.unlink(restored_path)
                     except:
                         print("Could not find record for " + restored_path)
@@ -595,14 +601,14 @@ def remove_migrated_files():
         except OSError:
             pass
 
-def reset_ontape_to_ondisk():
-    """Reset any files that are	marked as ONTAPE but actually appear on	the disk to ONDISK.
+def reset_ontape_to_unverified():
+    """Reset any files that are	marked as ONTAPE but actually appear on	the disk to UNVERIFIED.
        This is only if the file	is not a link."""
     ontape_files = TapeFile.objects.filter(stage=TapeFile.ONTAPE)
     for	of in ontape_files:
        	if os.path.exists(of.logical_path) and not os.path.islink(of.logical_path):
-       	    print("Reset {} to ONDISK".format(of.logical_path))
-            of.stage = TapeFile.ONDISK
+       	    print("Reset {} to UNVERIFIED".format(of.logical_path))
+            of.stage = TapeFile.UNVERIFIED
             of.save()
 
 
@@ -630,17 +636,27 @@ def run(*args):
        delete_files_not_in_a_request
        reset_unverified_files
        remove_migrated_files
-       reset_ontape_to_ondisk
+       reset_ontape_to_unverified
     """
 
+    global pk
     if len(args) == 0:
         print(run.__doc__)
+        sys.exit()
 
-    for a in args:
-        if a == "-h" or a == "--help":
-            print(run.__doc__)
-        method = globals().get(a)
+    a1 = None
+    a = args[0].split(",")
+    a0 = a[0].strip()
+    if(len(a) > 1):
+        a1 = a[1].strip()
+
+    if a0 == "-h" or a0 == "--help":
+        print(run.__doc__)
+    else:
+        method = globals().get(a0)
+        if a1 != None:
+            pk = int(a1)
         try:
             method()
         except Exception as e:
-            print("Failed running fix problem method: " + a + " " + str(e))
+            print("Failed running fix problem method: " + a0 + " " + str(e))

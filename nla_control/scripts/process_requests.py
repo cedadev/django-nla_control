@@ -65,16 +65,14 @@ def update_requests():
             r.save()
             continue
         if r.quota.user == "_VERIFY":
-            if r.label == "FROM QUICK_VERIFY PROCESS":
-                continue
             # Special case for verify to speed up process_requests
             request_files = r.request_files.split()
             present_tape_files = TapeFile.objects.filter(Q(stage=TapeFile.UNVERIFIED) & Q(logical_path__in=request_files))
             if len(present_tape_files) != 0:
                 r.active_request = True
-                r.files = present_tape_files.all()
+                r.files.set(present_tape_files.all())
                 r.save()
-                print("making active with " + str(present_tape_files.count()) + " new files")
+                print(" making active with " + str(present_tape_files.count()) + " new files")
             else:
                 print()
             continue
@@ -267,8 +265,10 @@ def get_spot_contents(spot_name):
     for out_item in out_lines:
         out_file = out_item.split()
         if len(out_file) == 11:
-            file_name = os.path.basename(out_file[10])
-            spot_files.append(file_name)
+            file_name = out_file[10]
+            size = out_file[1]
+            status = out_file[2]
+            spot_files.append({os.path.basename(file_name) : (file_name, size, status,)})
     return spot_files
 
 
@@ -296,7 +296,11 @@ def create_retrieve_listing(slot, target_disk):
     spot_list = {}
 
     for f in files:
-        spot_logical_path, spot_name = f.spotname()
+        try:
+            spot_logical_path, spot_name = f.spotname()
+        except:
+            print("Spotname name not found for file: {}".format(f))
+       	    continue
         # get a list of files in the spot if not already got
         if spot_name not in spot_list:
             spot_list[spot_name] = get_spot_contents(spot_name)
@@ -307,7 +311,9 @@ def create_retrieve_listing(slot, target_disk):
 
         to_check = os.path.basename(to_retrieve)
         # check it's in the spot on sd
-        if to_check in spot_list[spot_name]:
+        # spot list is now a list of dictionaries with the file name to check as the key
+        spot_list_keys = [list(s.keys())[0] for s in spot_list[spot_name]]
+        if to_check in spot_list_keys:
             retrieved_to_file_map[to_retrieve] = f
             file_listing.write(to_retrieve + "\n")
             f.stage = TapeFile.RESTORING
@@ -441,8 +447,9 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
         try:
             if len(restored_files) > 0:
                 fbi = CedaFbi(
-                        host_url="https://jasmin-es1.ceda.ac.uk",
-                        http_auth=("nla", "hOZrb!(>VkJ-h=q[")
+                        headers = {
+                            'x-api-key': CEDA_FBI_API_KEY
+                        }
                       )
                 fbi.update_file_location(file_list=restored_files, on_disk=True)
                 #print "Updated Elastic Search index for files ",
@@ -637,13 +644,13 @@ def run():
 
     # First of all check if the process is running - if it is then don't start running again
     try:
-        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
+        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).decode("utf-8").split("\n")
         n_processes = 0
         for l in lines:
             if "process_requests" in l and not "/bin/sh" in l:
                 n_processes += 1
     except:
-	    n_processes = 1
+        n_processes = 1
 
     if n_processes > MAX_PROCESSES+1:   # this process counts as one process_requests processx
         print("Process already running {} transfers, exiting".format(MAX_PROCESSES))

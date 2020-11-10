@@ -48,6 +48,8 @@ class RestoreDisk(models.Model):
             self.used_bytes += f.size
         self.save()
 
+class TapeFileException(Exception):
+    pass
 
 class TapeFile(models.Model):
     """Files that are archived on tape as the primary media, and have been added to the NLA system via move_files_to_nla.
@@ -100,7 +102,7 @@ class TapeFile(models.Model):
 
         response = requests.get(CEDA_DOWNLOAD_CONF)
         if response.status_code != 200:
-            raise Exception("Cannot find url: {}".format(CEDA_DOWNLOAD_CONF))
+            raise TapeFileException("Cannot find url: {}".format(CEDA_DOWNLOAD_CONF))
         else:
             page = response.text.split("\n")
 
@@ -121,7 +123,7 @@ class TapeFile(models.Model):
 
         response = requests.get(STORAGE_PATHS_URL)
         if response.status_code != 200:
-            raise Exception("Cannot find url: {}".format(STORAGE_PATHS_URL))
+            raise TapeFileException("Cannot find url: {}".format(STORAGE_PATHS_URL))
         else:
             page = response.text.split("\n")
 
@@ -144,15 +146,16 @@ class TapeFile(models.Model):
             :return: A tuple of (logical_spot_path, spot_name)
             :rtype: (string, string)
         """
-        file_path = self.logical_path
+        file_path = self._logical_path
         # find the longest logical path that matches the
         for l in TapeFile.fileset_logical_paths:
+            # convert to unicode if we have to
             if file_path[:len(l)] == l:
                 # start of the filename is the same as a fileset
                 return l, TapeFile.fileset_logical_path_map[l]
         else:
             # There should always be a spot for a file
-            raise Exception("File %s has no associated fileset" % file_path)
+            raise TapeFileException("File %s has no associated fileset" % file_path)
 
     def storage_path(self):
         """Return the current storage path to file.
@@ -175,7 +178,7 @@ class TapeFile(models.Model):
         return self.__unicode__()
 
     def __unicode__(self):
-        return "%s (%s)" % (self.logical_path, TapeFile.STAGE_NAMES[self.stage])
+        return "%s (%s)" % (self._logical_path, TapeFile.STAGE_NAMES[self.stage])
 
     def match(self, pattern):
         """Return whether the logical path of this TapeFile matches the input pattern (a UNIX filesystem pattern).
@@ -198,16 +201,25 @@ class TapeFile(models.Model):
         if len(existing_tape_file) == 0:
             TapeFile(logical_path=file_path, size=size, stage=TapeFile.UNVERIFIED).save()
 
-    def formatted_size(self):
-        return filesizeformat(self.size)
-    formatted_size.short_description = "size"
-
-    def formatted_logical_path(self):
+    @property
+    def _logical_path(self):
         slp = str(self.logical_path)
         if slp[0] == 'b':
             return slp[2:-1]
         else:
             return slp
+
+    def formatted_size(self):
+        return filesizeformat(self.size)
+    formatted_size.short_description = "size"
+
+    def formatted_logical_path(self):
+        slp = self._logical_path
+        return slp
+#        if slp[0] == 'b':
+#            return slp[2:-1]
+#        else:
+#            return slp
     formatted_logical_path.short_description = "logical_path"
 
 class Quota(models.Model):

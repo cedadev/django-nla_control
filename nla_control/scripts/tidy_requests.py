@@ -12,6 +12,7 @@
 
 from nla_control.models import TapeFile, TapeRequest
 import datetime
+import sys
 from pytz import utc
 from nla_control.settings import *
 from nla_control.scripts.process_requests import update_requests
@@ -19,6 +20,18 @@ from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
 import subprocess
 
 __author__ = 'sjp23'
+
+def in_other_request(tr, f):
+    # check that file is not in another request
+    in_other_req = False
+    now = datetime.datetime.now(utc)
+    active_tape_requests = TapeRequest.objects.filter(retention__gte=now)
+    file_in_requests = active_tape_requests.filter(files__id__exact = f.id)
+    in_other_req = file_in_requests.count() > 0
+    if (in_other_req > 0):
+       	if (f.stage == TapeFile.RESTORED or f.stage == TapeFile.RESTORING):
+            print("In other request {} {} {}".format(tr, f, file_in_requests))
+    return in_other_req
 
 def tidy_requests():
     """Run the tidying up of the TapeRequests.
@@ -66,6 +79,8 @@ def tidy_requests():
                 tr.files.add(*pf)
                 tr.save()
 
+    # list of restore disks used - cache them so that they only need to be updated once
+    restore_disks = []
     print("Tidying tape requests: find tape requests...")
     for tr in tape_requests:
         # make list of files to tidy
@@ -92,17 +107,7 @@ def tidy_requests():
                     continue
 
             # check that file is not in another request
-            in_other_request = False
-            now = datetime.datetime.now(utc)
-            for tape_request in TapeRequest.objects.filter(retention__gte=now):
-                if tape_request == tr:
-                    continue
-                if (f.stage == TapeFile.RESTORED or f.stage == TapeFile.RESTORING) and f in tape_request.files.all():
-                    print("Other request has requested this file.", f.logical_path)
-                    in_other_request = True
-                    break
-
-            if in_other_request:
+            if in_other_request(tr, f):
                 continue
 
             # if we get here then the file exists, has not been modified since checked and is not in another request
@@ -126,8 +131,8 @@ def tidy_requests():
                 try:
                     f.stage = TapeFile.ONTAPE
                     # get the restore disk and update
-                    if f.restore_disk:
-                        f.restore_disk.update()
+                    if f.restore_disk and not f in restore_disks:
+                        restore_disks.append(f.restore_disk)
                     # set no restore disk
                     f.restore_disk = None
                     f.save()
@@ -141,8 +146,8 @@ def tidy_requests():
                 try:
                     f.stage = TapeFile.ONTAPE
                     # get the restore disk and update
-                    if f.restore_disk:
-                        f.restore_disk.update()
+                    if f.restore_disk and not f in restore_disks:
+                        restore_disks.append(f.restore_disk)
                     # set no restore disk
                     f.restore_disk = None
                     f.save()
@@ -158,8 +163,9 @@ def tidy_requests():
             # Open connection to index and update files
             if len(removed_files) > 0:
                 fbi = CedaFbi(
-                        host_url="https://jasmin-es1.ceda.ac.uk",
-                        http_auth=("nla", "hOZrb!(>VkJ-h=q[")
+                          headers = {
+                              'x-api-key' : CEDA_FBI_API_KEY
+                        }
                       )
                 fbi.update_file_location(file_list=removed_files, on_disk=False)
             print("Updated Elastic Search index for files ",)
@@ -171,6 +177,10 @@ def tidy_requests():
 
         print("Remove request %s" % tr)
         tr.delete()
+    # update the restore disk used
+    print("Updating restore disk")
+    for rd in restore_disks:
+        rd.update()
 
 
 def run():
@@ -178,16 +188,19 @@ def run():
     # First of all check if the process is running - if it is then don't start running again
     print("Starting tidy_requests")
     try:
-        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).split("\n")
+        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).decode("utf-8").split("\n")
         n_processes = 0
         for l in lines:
             if "tidy_requests" in l and not "/bin/sh" in l:
                 print(l)
-        if n_processes == 1:
-            print("Process already running, exiting")
-            n_processes += 1
+                n_processes += 1
     except:
         n_processes = 1
-    if n_processes == 1:   # this process counts as one move_files_to_nla process
-        tidy_requests()
+
+    if n_processes > 1:
+        print("Process already running, exiting")
+        sys.exit()
+
+    # otherwise run
+    tidy_requests()
     print("Finished tidy_requests")

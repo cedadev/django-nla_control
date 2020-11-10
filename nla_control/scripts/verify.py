@@ -2,12 +2,13 @@ __author__ = 'sjp23'
 
 # verify files on storage-D
 
-from nla_control.models import TapeFile, TapeRequest, Quota
+from nla_control.models import TapeFile, TapeRequest, Quota, TapeFileException
 import glob
 import pytz
 import os
 import datetime
 import sys
+import subprocess
 from nla_control.settings import *
 
 # load storage paths to do path translation to from logical to storage paths.
@@ -55,9 +56,28 @@ def run(*args):
                       message with each of the filenames.
         """
 
+    # First of all check if the process is running - if it is then don't start running again
+    try:
+        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).decode("utf-8").split("\n")
+        n_processes = 0
+        for l in lines:
+            if "verify" in l and "manage.py" in l:
+                print(l)
+                n_processes += 1
+    except:
+        n_processes = 1
+
+    if n_processes > 1:
+        print("Process already running, exiting")
+        sys.exit()
 
     files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
-    print("Number of UNVERIFIED files: " + str(len(files)))
+    n_files = files.count()
+    print("Number of UNVERIFIED files: {}".format(n_files))
+
+    # limit to last 100000 for test
+#    LIMIT = 100000
+#    files = files[n_files-LIMIT:]
 
     if "verify_now" in args:
         verify_now = True
@@ -100,21 +120,26 @@ def run(*args):
     error_log_files = []
 
     for f in files:
-        spot_logical_path, spot_name = f.spotname()
-        file_path = f.logical_path
+        try:
+            spot_logical_path, spot_name = f.spotname()
+        except TapeFileException:
+            # sometimes it's not finding the spotname!
+            print("Spotname not found for file: {}".format(f))
+       	    continue
+        file_path = f._logical_path
         if TEST_VERSION:
             to_find = file_path     # test version verification is just calculate insitu
         else:
             to_find = file_path.replace(spot_logical_path, "/datacentre/restorecache/archive/%s" % spot_name)
 
         # find all log files
-        restore_log_files = glob.glob(CHKSUMSDIR + "/%s.chksums.*" % spot_name)
+        restore_log_search = CHKSUMSDIR + "/%s.chksums.*" % spot_name
+        restore_log_files = glob.glob(restore_log_search)
 
         # if there are no log files then go to next file
         if len(restore_log_files) == 0:
-            if not spot_name in missing_log_files:
-                missing_log_files.append(spot_name)
-       	    #print ("Restore log files not found for spot: " + str(spot_name))
+            if not((restore_log_search, spot_name) in missing_log_files):
+                missing_log_files.append((restore_log_search, spot_name))
             continue
 
         # A problem here is that there may be more than one restore_log file for each file_set
@@ -132,9 +157,8 @@ def run(*args):
                 # get the checksum and filename
                 strip_line = line.strip().split()
                 if len(strip_line) < 2:
-                    if not spot_name in error_log_files:
-                        error_log_files.append(spot_name)
-#                    print ("Could not read line in restore log file correctly {} {}".format(line, restore_log))
+                    if not((restore_log, spot_name) in error_log_files):
+                        error_log_files.append((restore_log, spot_name))
                     continue
                 checksum = strip_line[0]
                 filename = strip_line[1]
@@ -145,7 +169,7 @@ def run(*args):
                     f.verified = now
                     f.save()
                     # add the request files to the tape request
-                    tape_request.request_files += f.logical_path + "\n"
+                    tape_request.request_files += f._logical_path + "\n"
                     # increment the number of verified files and indicate that the file is found
                     num_verified_files += 1
                     file_found = True
@@ -161,11 +185,13 @@ def run(*args):
         tape_request.save()
 
     # print the errors:
-    print ("Missing restore log files")
-    for mf in missing_log_files:
-        print("    {}".format(mf))
+    if len(missing_log_files) > 0:
+        print ("Missing restore log files")
+        for mf in missing_log_files:
+            print("    {}".format(mf))
 
-    print ()
-    print ("Errors in log files")
-    for ef in error_log_files:
-        print("    {}".format(ef))
+    if len(error_log_files) > 0:
+        print ()
+        print ("Errors in log files")
+        for ef in error_log_files:
+            print("    {}".format(ef))
