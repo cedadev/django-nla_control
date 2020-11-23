@@ -43,7 +43,7 @@ def run(*args):
         lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).decode("utf-8").split("\n")
         n_processes = 0
         for l in lines:
-            if "quick_verify" in l and "manage.py" in l:
+            if "quick_verify" in l and not "/bin/sh" in l:
                 print(l)
                 n_processes += 1
     except:
@@ -51,6 +51,7 @@ def run(*args):
 
     if n_processes > 1:
         print("Process already running, exiting")
+        sys.exit(0)
 
     if "verify_now" in args:
         verify_now = True
