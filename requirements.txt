@@ -6,6 +6,6 @@ django-multiselectfield==0.1.12
 psycopg2-binary==2.8.5
 pyparsing==2.4.7
 pytz==2020.1
-requests==2.24.0,
-tqdm=4.49.0,
+requests==2.24.0
+tqdm==4.49.0
 -e git+https://github.com/cedadev/ceda-elasticsearch-tools.git#egg=ceda_elasticsearch_tools
