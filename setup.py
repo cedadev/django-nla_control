@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nla_control',
-    version='1.0.0',
+    version='1.0.6',
     packages=['nla_control'],
     install_requires=[
         'appdirs',
