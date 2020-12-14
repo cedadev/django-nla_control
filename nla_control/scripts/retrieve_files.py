@@ -515,8 +515,8 @@ def run():
     except:
         n_processes = 1
 
-    if n_processes > MAX_PROCESSES+1:   # this process counts as one process_requests processx
-        print("Process already running {} transfers, exiting".format(MAX_PROCESSES))
+    if n_processes > MAX_RETRIEVALS+1:   # this process counts as one process_requests processx
+        print("Process already running {} transfers, exiting".format(MAX_RETRIEVALS))
         sys.exit()
 
     # flag whether storage paths are loaded

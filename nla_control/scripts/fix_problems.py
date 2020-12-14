@@ -35,6 +35,7 @@ def clear_slots():
             slot.tape_request = None
             slot.save()
 
+
 def set_restoring_files_to_ontape():
     """Set all files that are stuck in a "RESTORING" state to "ONTAPE"
     """

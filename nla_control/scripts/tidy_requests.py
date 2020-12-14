@@ -27,11 +27,13 @@ def in_other_request(tr, f):
     now = datetime.datetime.now(utc)
     active_tape_requests = TapeRequest.objects.filter(retention__gte=now)
     file_in_requests = active_tape_requests.filter(files__id__exact = f.id)
-    in_other_req = file_in_requests.count() > 0
-    if (in_other_req > 0):
-       	if (f.stage == TapeFile.RESTORED or f.stage == TapeFile.RESTORING):
+    in_other_req = (file_in_requests.count() > 0)
+    if (in_other_req):
+        if (f.stage == TapeFile.RESTORED or f.stage == TapeFile.RESTORING
+            or f.stage == TapeFile.ONDISK):
             print("In other request {} {} {}".format(tr, f, file_in_requests))
-    return in_other_req
+            return True
+    return False
 
 def tidy_requests():
     """Run the tidying up of the TapeRequests.
