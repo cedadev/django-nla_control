@@ -318,16 +318,16 @@ class TapeRequest(models.Model):
             request_files = self.request_files
             nreqfiles = len(request_files.split())
             if self.label:
-                return "%s [%s / %s files]" % (self.label, nfiles, nreqfiles)
+                return "%i %s [%s / %s files]" % (self.pk, self.label, nfiles, nreqfiles)
             elif self.request_patterns:
-                return "Pattern: %s [%s files]" % (self.request_patterns[:120], nfiles)
+                return "%i Pattern: %s [%s files]" % (self.pk, self.request_patterns[:120], nfiles)
             elif nfiles == 0:
                 return "No files requested"
             elif nfiles == 1:
-                return "Single File %s" % files[0]
+                return "%i Single File %s" % (self.pk, files[0])
             else:
                 nreq_files = len(self.request_files.all())
-                return "%s ... [%s / %s files]" % (files[0], nfiles, nreqfiles)
+                return "%i %s ... [%s / %s files]" % (self.pk, files[0], nfiles, nreqfiles)
         except:
             return "No files present"
 

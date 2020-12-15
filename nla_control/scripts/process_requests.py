@@ -54,9 +54,6 @@ def update_requests():
         new_files = []
         present_tape_files = []
         print("    Request ID " + str(r.id) + " user " + r.quota.user,)
-        if r.active_request:
-            print("        already active")
-            continue
         # check whether the number of files downloaded is the same number as requested and continue if it is
         nfiles = r.files.filter(Q(stage=TapeFile.ONDISK) | Q(stage=TapeFile.RESTORED))
         nreq_files = len(r.request_files.split())
@@ -130,7 +127,11 @@ def load_slots():
     for s in range(0, slots.count()):
         # if the slot is not None, then it is occupied
         if slots[s].tape_request is not None:
-            continue
+            # if the slot continues a non-active (completed) request then reset the slot
+            if slot[s].tape_request.active_request is None:
+                slot[s].tape_request = None
+            else:
+                continue
 
         # find the next request
         while irequest < requests.count():

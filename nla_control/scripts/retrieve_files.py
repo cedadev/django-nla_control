@@ -232,7 +232,9 @@ def start_sd_get(slot, file_listing_filename, target_disk):
 
     # start storage-D process and record pid and host
     p = subprocess.Popen(sd_get_cmd)
-    print("Starting retrieval of file listing: ".format(file_listing_filename))
+    print("Starting retrieval of file listing : {}".format(
+        file_listing_filename)
+    )
     slot.host_ip = socket.gethostbyname(socket.gethostname())
     slot.pid = p.pid
     slot.save()
@@ -344,7 +346,7 @@ def complete_request(slot):
        :param integer slot: slot number
     """
     print("Completing request {} on slot {}".format(
-        slot.tape_request, slot.pk
+        slot.tape_request, slot.pk)
     )
     # request ended - mark request as finished
     slot.tape_request.storaged_request_end = datetime.datetime.utcnow()
@@ -429,7 +431,7 @@ def redo_request(slot):
        :param integer slot: slot number to redo the request for
     """
     print("Redoing request {} on slot {}".format(
-        slot.tape_request, slot.pk
+        slot.tape_request, slot.pk)
     )
     # mark unrestored files as on tape
     for f in slot.tape_request.files.filter(stage=TapeFile.RESTORING):
@@ -531,7 +533,7 @@ def run():
         if slot.tape_request is None:
             print("  No request for slot %s" % slot.pk)
             continue
-        elif slot.tape_request.pid is not None:
+        elif slot.pid is not None:
             print("  Request for %s already active on slot %s" % (slot.tape_request, slot.pk))
             check_happy(slot)
             continue

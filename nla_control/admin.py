@@ -28,7 +28,7 @@ admin.site.register(Quota, QuotaAdmin)
 
 class SlotAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('pk', 'tape_request')
+    list_display = ('pk', 'tape_request', 'pid', 'host_ip')
     search_fields = ('tape_request',)
     readonly_fields = ('tape_request', 'pid', 'host_ip', 'request_dir')
 admin.site.register(StorageDSlot, SlotAdmin)
