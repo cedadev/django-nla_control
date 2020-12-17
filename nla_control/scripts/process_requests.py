@@ -80,11 +80,11 @@ def update_requests():
             # get the files in the request
             request_files = r.request_files.split()
             # get the TapeFile QuerySet for the files that are in the request and present on tape in the NLA system
-            new_files = TapeFile.objects.filter(Q(stage=TapeFile.ONTAPE) & Q(logical_path__in=request_files))
+            new_files = TapeFile.objects.filter((Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING)) & Q(logical_path__in=request_files))
 
         elif r.request_patterns != "":
             # if the request is a pattern request
-            new_files = TapeFile.objects.filter(Q(stage=TapeFile.ONTAPE) & Q(logical_path__contains=r.request_patterns))
+            new_files = TapeFile.objects.filter((Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING)) & Q(logical_path__contains=r.request_patterns))
 
         if new_files.count() != 0:
             r.files.add(*(list(new_files.all())))
@@ -128,8 +128,13 @@ def load_slots():
         # if the slot is not None, then it is occupied
         if slots[s].tape_request is not None:
             # if the slot continues a non-active (completed) request then reset the slot
-            if slot[s].tape_request.active_request is None:
-                slot[s].tape_request = None
+            if not slots[s].tape_request.active_request:
+                slot = slots[s]
+                print("Removing request {} from slot {} as request is no longer active".format(
+                          slot.tape_request.pk, slot.pk)
+                     )
+                slot.tape_request = None
+                slot.save()
             else:
                 continue
 
@@ -170,6 +175,9 @@ def load_slots():
         # assign the request to the slot
        	slot = slots[s]
         slot.tape_request = requests[irequest]
+        print("Assigning request {} to slot {}".format(
+                   slot.tape_request.pk, slot.pk)
+             )
        	slot.save()
        	irequest += 1
 
