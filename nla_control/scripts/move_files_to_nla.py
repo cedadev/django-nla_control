@@ -32,9 +32,10 @@ def get_filesets():
     """
     # open download config - list os storage pots with logical paths
     filesets = requests.get(ON_TAPE_URL)
+    fsets = filesets.content[:-1].split(b'\n')
 
-    filesets = map(lambda x: x.split()[2].strip(), filesets)
-    return filesets
+    fsets2 = map(lambda x: x.split()[2].strip(), fsets)
+    return fsets2
 
 def run():
     """Function picked up by django-extensions. Runs the scan for matching filesets.
@@ -49,14 +50,14 @@ def run():
         n_processes = 0
         for l in lines:
             if "move_files_to_nla" in l and not "/bin/sh" in l:
-                print(l)
-                print("Process already running, exiting")
                 n_processes += 1
     except:
         n_processes = 1
 
-    if n_processes == 1:   # this process counts as one move_files_to_nla process
-
+    if n_processes > 1:
+        print("Process already running, exiting")
+        sys.exit()
+    else:
         filesets = get_filesets()
         for fs in filesets:
             for directory, dirs, files in os.walk(fs):
@@ -64,10 +65,10 @@ def run():
                     path = os.path.join(directory, f)
                     try:
                         if os.path.islink(path):
-                            print("Ignore Link:", path)
+                            #print("Ignore Link:", path)
                             continue
                         if os.path.getsize(path) < MIN_FILE_SIZE:
-                            print("Ignore Small:", path)
+                            #print("Ignore Small:", path)
                             continue
 
                         print("Adding ", path)

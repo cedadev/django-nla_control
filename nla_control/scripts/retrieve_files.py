@@ -411,7 +411,9 @@ def start_retrieval(slot):
         if slot.tape_request.files.filter(stage=TapeFile.RESTORING).count() == 0:
             complete_request(slot)
         else:
-            redo_request(slot)
+            print("Request finished on StorageD, but all files in request not retrieved yet")
+            complete_request(slot)	# remove from the slot
+            redo_request(slot)          # mark the request to reattempt later
         return True
     else:
         # Deactivate request and make slot available to others
@@ -468,9 +470,9 @@ def check_happy(slot):
     # look for files stuck in RESTORING state
     if slot.pid is None or slot.host_ip is None:
         start_time = slot.tape_request.storaged_request_start.replace(tzinfo=utc)
-        if start_time < datetime.datetime.now(utc) + datetime.timedelta(seconds=20):
+        if start_time < datetime.datetime.now(utc) + datetime.timedelta(seconds=120):
             # no port or host ip and not started
-            print("Reset request: pid or host not set and not started for 20s.")
+            print("Reset request: pid or host not set and not started for 120s.")
             redo_request(slot)
             return
         else:
