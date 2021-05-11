@@ -31,6 +31,7 @@ import re
 import socket
 from pytz import utc
 import sys, os
+import random
 
 from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
 
@@ -119,7 +120,11 @@ def load_slots():
     in ``settings.py``.
     """
     # first come first served
-    requests = TapeRequest.objects.filter(active_request=True).order_by('request_date')
+    # NRM - 28/04/2021 - older requests that are not completing are currently blocking the progress of newer requests
+    # change the order to a random order until a better solution can be found
+    requests = TapeRequest.objects.filter(active_request=True).order_by('-request_date')
+    request_order = list(range(0,requests.count()))
+    random.shuffle(request_order)
     irequest = 0
 
     # loop over all the slots, look for a request to add to it
@@ -139,15 +144,16 @@ def load_slots():
                 continue
 
         # find the next request
-        while irequest < requests.count():
+        while irequest < len(request_order):
             # check whether this request is already in a slot
-            if StorageDSlot.objects.filter(tape_request=requests[irequest]).count() != 0:
+            c_request = request_order[irequest] # map from random list
+            if StorageDSlot.objects.filter(tape_request=requests[c_request]).count() != 0:
                 # on to the next one
                 irequest += 1
                 continue
 
             # get the user from the request
-            quota_user = requests[irequest].quota.user
+            quota_user = requests[c_request].quota.user
 
             # don't process requests from the "_VERIFY" user
             if quota_user == "_VERIFY":
@@ -174,7 +180,7 @@ def load_slots():
 
         # assign the request to the slot
        	slot = slots[s]
-        slot.tape_request = requests[irequest]
+        slot.tape_request = requests[c_request]
         print("Assigning request {} to slot {}".format(
                    slot.tape_request.pk, slot.pk)
              )
