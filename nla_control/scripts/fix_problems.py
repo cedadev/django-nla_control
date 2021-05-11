@@ -7,6 +7,7 @@
 """
 #
 # import nla objects
+from django.db.models import Count
 from nla_control.models import *
 from nla_control.settings import *
 from nla_control.scripts.tidy_requests import in_other_request
@@ -25,11 +26,35 @@ from sizefield.utils import filesizeformat
 global pk
 pk=None
 
+def get_spot_contents(spot_name):
+    """Get a list of the files in the spot `spot_name`"""
+
+    sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+    try:
+        output = subprocess.check_output(sd_cmd).decode("utf-8")
+    except subprocess.CalledProcessError:
+        return []
+
+    out_lines = output.split("\n")
+    spot_files = []
+    for out_item in out_lines:
+        out_file = out_item.split()
+        if len(out_file) == 11:
+            file_name = out_file[10]
+            spot_files.append(os.path.basename(file_name))
+    return spot_files
+
 def clear_slots():
     """Remove all tasks from the slots directory"""
     for slot in StorageDSlot.objects.all():
         # reset slot if pid is None
         if slot.pid is None:
+            slot.pid = None
+            slot.host_ip = None
+            slot.tape_request = None
+            slot.save()
+        # if the slot matches the pk then force the removal
+        if pk is not None and slot.pk == pk:
             slot.pid = None
             slot.host_ip = None
             slot.tape_request = None
@@ -133,25 +158,28 @@ def fix_missing_links():
        This function removes the links and sets the file's status back to ONTAPE.  These files will
        then restore the files to the restore area if the files are part of a *TapeRequest*"""
     # get all the restored and restoring files
+    DUMMY_RUN = False
     tape_files = TapeFile.objects.filter(Q(stage=TapeFile.RESTORING) | Q(stage=TapeFile.RESTORED))
     for f in tape_files:
         if not os.path.exists(f.logical_path) and os.path.lexists(f.logical_path):
             # unlink
             print("Removing link to: " + f.logical_path)
-            os.remove(f.logical_path)
-            # set the stage to "ONTAPE"
-            f.stage = TapeFile.ONTAPE
-            f.restore_disk = None
-            f.save()
+            if not DUMMY_RUN:
+                os.remove(f.logical_path)
+                # set the stage to "ONTAPE"
+                f.stage = TapeFile.ONTAPE
+                f.restore_disk = None
+                f.save()
     # loop over any files that are ONDISK but actually missing
     tape_files = TapeFile.objects.filter(Q(stage=TapeFile.ONDISK))
     for f in tape_files:
         if not os.path.exists(f.logical_path):
             print("File not found: " + f.logical_path)
-            # set the stage to unverified
-            f.stage = TapeFile.UNVERIFIED
-            f.restore_disk = None
-            f.save()
+            if not DUMMY_RUN:
+                # set the stage to ONTAPE
+                f.stage = TapeFile.ONTAPE
+                f.restore_disk = None
+                f.save()
 
 
 def fix_restore_links():
@@ -241,49 +269,52 @@ def clean_up_restore_disk():
         # loop over the files
         for rf in retrieve_files:
             # get the request_id
-            req_id = int(rf.split("_")[-1][:-4])
-            # flag to keep track of whether to delete or not
-            delete = False
-            # get the tape request
             try:
-                tape_req = TapeRequest.objects.get(pk=req_id)
-            except:
-                # tape_req does not exist so set delete to true
-                delete = True
-            # if we are to delete, open the retrieval file
-            if delete:
-                fh = open(rf)
-                # get the file names
-                fnames = fh.readlines()
-                for fn in fnames:
-                    fname = fn.strip()
-                    # build the filepath and see if it exists
-                    if len(fname) > 0:
-                        fp = str(os.path.join(rd.mountpoint, fname[1:]))
-                        try:
-                            logical_path = ""
-                            if os.path.exists(fp):
-                                # get the spot name
-                                file_name_cmpts = fp.split("/")
-                                for i in range(0, len(file_name_cmpts)):
-                                    fnc = file_name_cmpts[i]
-                                    # get the logical path name
-                                    if "spot" in fnc:
-                                        logical_path = spot_to_logical_path_mapping[fnc]
-                                        for j in range(i+1, len(file_name_cmpts)):
-                                            logical_path += "/" + file_name_cmpts[j]
-                                        break
-                            if logical_path != "":
-                                # get the tapefile object
-                                tape_file = TapeFile.objects.get(logical_path=logical_path)
-                                # unlink the archived file if it exists and tape file stage is ONTAPE
-                                if tape_file.stage == TapeFile.ONTAPE:
-                                    print ("Deleting " + str(fp))
-                                    os.unlink(fp)
+                req_id = int(rf.split("_")[-1][:-4])
+                # flag to keep track of whether to delete or not
+                delete = False
+                # get the tape request
+                try:
+                    tape_req = TapeRequest.objects.get(pk=req_id)
+                except:
+                    # tape_req does not exist so set delete to true
+                    delete = True
+                # if we are to delete, open the retrieval file
+                if delete:
+                    fh = open(rf)
+                    # get the file names
+                    fnames = fh.readlines()
+                    for fn in fnames:
+                        fname = fn.strip()
+                        # build the filepath and see if it exists
+                        if len(fname) > 0:
+                            fp = str(os.path.join(rd.mountpoint, fname[1:]))
+                            try:
+                                logical_path = ""
+                                if os.path.exists(fp):
+                                    # get the spot name
+                                    file_name_cmpts = fp.split("/")
+                                    for i in range(0, len(file_name_cmpts)):
+                                        fnc = file_name_cmpts[i]
+                                        # get the logical path name
+                                        if "spot" in fnc:
+                                            logical_path = spot_to_logical_path_mapping[fnc]
+                                            for j in range(i+1, len(file_name_cmpts)):
+                                                logical_path += "/" + file_name_cmpts[j]
+                                            break
+                                if logical_path != "":
+                                    # get the tapefile object
+                                    tape_file = TapeFile.objects.get(logical_path=logical_path)
+                                    # unlink the archived file if it exists and tape file stage is ONTAPE
+                                    if tape_file.stage == TapeFile.ONTAPE:
+                                        print ("Deleting " + str(fp))
+                                        os.unlink(fp)
 
-                        except:
-                            pass
-                fh.close()
+                            except:
+                                pass
+                    fh.close()
+            except:
+                continue
 
 
 def clean_up_orphaned_files():
@@ -381,6 +412,7 @@ def reset_removed_files():
     # for each spot run sd_ls on the spot name to get the list of files in the spot back
     for spot_name in spot_files:
         print("Working on spot: ", spot_name, )
+        # should be able to replace this with get_spot_contents
         sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
         print("... sd_ls completed")
         output = subprocess.check_output(sd_cmd).decode("utf-8")
@@ -612,6 +644,73 @@ def reset_ontape_to_unverified():
             of.stage = TapeFile.UNVERIFIED
             of.save()
 
+def remap_spotpath_to_logical_path():
+    """There seems to be some entries in the database with the spotname named mapped into the logical
+       path field.  Possibly due to an error at some point in the move_files_to_nla script.
+       This has the knock on effect that those files are not verifyable.
+       This function fixes those entries, mapping them back to the logical path."""
+    # get the list of UNVERIFIED files
+    pattern = "/datacentre/archvol"
+    unver_files = TapeFile.objects.filter(Q(stage=TapeFile.UNVERIFIED) & Q(logical_path__contains=pattern))
+    print("Number of erroneous files: {}".format(unver_files.count()))
+    spot_to_logical_file_mapping = get_spot_to_logical_path_mapping()
+
+    # dictionary to store spot contents to minimise calls to sd_ls
+    spot_contents = {}
+
+    # loop over every unverfied file that is in the wrong place!
+    for f in unver_files:
+        # split the filepath
+        parts = f.logical_path.split("/")
+        # find the spotname in the split parts
+        for p in parts:
+            if "spot" in p:
+                spotname = p
+                # get the remainder of the path
+                i = parts.index(p)
+                fname = "/".join(parts[i+1:]).strip("'")
+                break
+        # get the true logical path:
+        try: 
+            new_logical_path = spot_to_logical_file_mapping[spotname]
+        except KeyError: 
+            print("Could not find logical path for spotname {}".format(spotname))
+            continue
+        # join the filename onto the logical path
+        new_logical_path = os.path.join(new_logical_path, fname.strip("'"))
+        # check it exists before remapping it
+        if os.path.exists(new_logical_path):
+            print("Remap {} -> {}".format(f.logical_path, new_logical_path))
+            f.logical_path = new_logical_path
+            f.save()
+        else:
+            # look for the file on tape
+            if not spotname in spot_contents:
+                spot_contents[spotname] = get_spot_contents(spotname)
+            if fname in spot_contents[spotname]:
+                print("Remap on tape file: {} -> {}".format(f.logical_path, new_logical_path))
+                f.logical_path = new_logical_path
+                f.save()
+            else:
+                print("File does not exist {}, trying to remap {}".format(new_logical_path, f.logical_path))
+
+def fix_logical_path_in_db():
+    """Some logical paths in the db contain b''.  Remove these."""
+    # get a query set of duplicates:
+    tp = TapeFile.objects.filter(
+	logical_path__contains="b'"
+    )
+    print("Number of byte encoded logical paths: {}".format(tp.count()))
+    for t in tp:
+        if(t.logical_path[:2] == "b'"):
+            new_logical_path = t.logical_path[2:-1]
+            t.logical_path = new_logical_path
+            t.save()
+            print(t.logical_path, new_logical_path)
+
+def remove_duplicates():
+    """Remove any duplicates in the database."""
+    pass
 
 def run(*args):
     """Entry point for the Django script run via ``./manage.py runscript``
@@ -638,6 +737,9 @@ def run(*args):
        reset_unverified_files
        remove_migrated_files
        reset_ontape_to_unverified
+       remap_spotpath_to_logical_path
+       remove_duplicates
+       fix_logical_path_in_db
     """
 
     global pk
