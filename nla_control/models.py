@@ -204,6 +204,7 @@ class TapeFile(models.Model):
     @property
     def _logical_path(self):
         slp = str(self.logical_path)
+        return slp
         if slp[0] == 'b':
             return slp[2:-1]
         else:
@@ -370,6 +371,21 @@ class TapeRequest(models.Model):
             return 0
         else:
             return s['tot_size']
+
+    def first_1000_files(self):
+        """Return a query set of the first 1000 files."""
+        # get the tape files:
+        tfiles = self.files.all()[0:1000]
+        retstr = "\n".join([str(t) for t in tfiles])
+        return retstr
+    first_1000_files.short_description = "First 1000 files known to NLA"
+
+
+    def first_1000_request_files(self):
+        """Return just the first 1000 request files."""
+        req_files = self.request_files.split("\n")[0:1000]
+        return "\n".join(req_files)
+    first_1000_request_files.short_description = "First 1000 request files"
 
 
 class StorageDSlot(models.Model):
