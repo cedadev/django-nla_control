@@ -261,6 +261,8 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
     ended = False
 
     while True:
+        # sleep first, to allow process to start
+        time.sleep(10)
         # see if process has ended
         if p.poll() is not None:
             ended = True
@@ -336,9 +338,6 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
         if ended:
             break
 
-        time.sleep(10)
-
-
 def complete_request(slot):
     """Tidy up slot after a completed request.  This involves setting dates for the storaged_request_end
     and last_files_on_disk members, setting the active_request to False and clearing the slot.
@@ -412,7 +411,6 @@ def start_retrieval(slot):
             complete_request(slot)
         else:
             print("Request finished on StorageD, but all files in request not retrieved yet")
-            complete_request(slot)	# remove from the slot
             redo_request(slot)          # mark the request to reattempt later
         return True
     else:
