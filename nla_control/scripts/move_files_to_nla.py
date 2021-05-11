@@ -32,10 +32,19 @@ def get_filesets():
     """
     # open download config - list os storage pots with logical paths
     filesets = requests.get(ON_TAPE_URL)
-    fsets = filesets.content[:-1].split(b'\n')
+    filesets_page = filesets.text.split("\n")
 
-    fsets2 = map(lambda x: x.split()[2].strip(), fsets)
-    return fsets2
+    fileset_list = []
+
+    for line in filesets_page:
+        if line == '':
+            continue
+        try:
+            fileset_list.append(line.split()[2])
+        except IndexError:
+            continue
+
+    return fileset_list
 
 def run():
     """Function picked up by django-extensions. Runs the scan for matching filesets.
