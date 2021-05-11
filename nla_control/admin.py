@@ -16,8 +16,8 @@ class TapeReqAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ("__unicode__", 'quota', 'active_request', 'retention', 'storaged_request_start', 'storaged_request_end')
     list_filter = ('quota',)
-#    exclude = ('active_request',)
-    readonly_fields = ('files', 'request_patterns', 'request_files', 'storaged_request_start', 'storaged_request_end', 'first_files_on_disk', 'last_files_on_disk')
+    exclude = ('request_files', 'files',)
+    readonly_fields = ('first_1000_files', 'request_patterns', 'first_1000_request_files', 'storaged_request_start', 'storaged_request_end', 'first_files_on_disk', 'last_files_on_disk')
 admin.site.register(TapeRequest, TapeReqAdmin)
 
 class QuotaAdmin(admin.ModelAdmin):
