@@ -81,9 +81,9 @@ def run(*args):
     print("...done")
 
     # limit each batch to 100,000 files to remove
-    files = TapeFile.objects.filter(query)[start:start+100000]
-    print("Number of UNVERIFIED files that can be quick verified: " +
-          str(len(files)))
+    LIMIT = 100000
+    files = TapeFile.objects.filter(query)[start:start+LIMIT]
+    print("Number of UNVERIFIED files that can be quick verified: {} ".format(files.count()))
 
     # make a tape file request so all verified files belong to a request. This request
     # belongs to the _VERIFY quota.
@@ -121,14 +121,20 @@ def run(*args):
 
         # if the spot_name is not in the spot_lists then do a sd_ls
         if spot_name not in spot_lists:
-            spot_lists[spot_name] = get_spot_contents(spot_name)
+            sl = get_spot_contents(spot_name)
+            spot_lists[spot_name] = {}
+            # convert this to a true dictionary, rather than a list of dictionaries
+            for s in sl:
+                key = list(s)[0]
+                value = s[key]
+                spot_lists[spot_name][key] = value
                     
         file_path = f.logical_path
         if TEST_VERSION:
             to_find = file_path     # test version verification is just
                                     # calculate insitu
         else:
-            to_find = os.path.basename(spot_logical_path)
+            to_find = os.path.basename(file_path).strip("'")
 
         if to_find in spot_lists[spot_name]:
             # spot_lists[spot_name] is a dictionary with to_find as the key, then a tuple is the value (file_name, size, status)
