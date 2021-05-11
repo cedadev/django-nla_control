@@ -15,7 +15,7 @@ from django.db.models import Q
 from nla_control.models import TapeFile, TapeRequest, Quota
 from nla_control.settings import *
 
-from nla_control.scripts.process_requests import get_spot_contents
+from nla_control.scripts.retrieve_files import get_spot_contents
 
 def run(*args):
 
