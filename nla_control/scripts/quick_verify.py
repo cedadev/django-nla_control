@@ -81,8 +81,9 @@ def run(*args):
     print("...done")
 
     # limit each batch to 100,000 files to remove
-    LIMIT = 100000
-    files = TapeFile.objects.filter(query)[start:start+LIMIT]
+#    LIMIT = 100000
+#    files = TapeFile.objects.filter(query)[start:start+LIMIT]
+    files = TapeFile.objects.filter(query)
     print("Number of UNVERIFIED files that can be quick verified: {} ".format(files.count()))
 
     # make a tape file request so all verified files belong to a request. This request
@@ -138,7 +139,8 @@ def run(*args):
 
         if to_find in spot_lists[spot_name]:
             # spot_lists[spot_name] is a dictionary with to_find as the key, then a tuple is the value (file_name, size, status)
-            if spot_lists[spot_name][to_find][2] == "TAPED":
+            stage = spot_lists[spot_name][to_find][2]
+            if stage in ["TAPED", "SYNCED"]:
                 tape_request.request_files += file_path + "\n"
                 num_verified_files += 1
 

@@ -86,15 +86,15 @@ def tidy_requests():
     print("Tidying tape requests: find tape requests...")
     for tr in tape_requests:
         # make list of files to tidy
-        print(tr)
         to_remove = []
 
         for f in tr.files.all():
             # Check if the file does not exist on the disk anymore - but only remove it if it is still in a restored state
             if not os.path.exists(f.logical_path):
                 if f.stage == TapeFile.RESTORED:
-                    print("File requests exists, but file is not on the disk. Removing file from NLA:", f.logical_path)
-                    #f.delete()
+                    print("File requests exists, but file is not on the disk. Setting stage to DELETED:", f.logical_path)
+                    f.stage = TapeFile.DELETED
+                    f.save()
                 continue
             file_mod = datetime.datetime.fromtimestamp(os.path.getmtime(f.logical_path), utc)
             if f.verified:
@@ -204,5 +204,6 @@ def run():
         sys.exit()
 
     # otherwise run
+    update_requests()
     tidy_requests()
     print("Finished tidy_requests")

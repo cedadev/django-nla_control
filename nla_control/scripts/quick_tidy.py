@@ -103,7 +103,7 @@ def run():
         sys.exit()
 
     # otherwise run
-#    remove_expired_empty_requests()
-#    update_expired_requests()
+    remove_expired_empty_requests()
+    update_expired_requests()
     files_in_other_request()
     print("Finished quick_tidy")

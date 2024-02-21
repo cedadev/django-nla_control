@@ -47,14 +47,15 @@ def get_spot_contents(spot_name):
 def clear_slots():
     """Remove all tasks from the slots directory"""
     for slot in StorageDSlot.objects.all():
-        # reset slot if pid is None
-        if slot.pid is None:
+        # reset slot if pid is None and no pk specified
+        if pk is None and slot.pid is None:
             slot.pid = None
             slot.host_ip = None
             slot.tape_request = None
             slot.save()
         # if the slot matches the pk then force the removal
-        if pk is not None and slot.pk == pk:
+        if pk is not None and slot.pk == int(pk):
+            print("Clear slot {}".format(slot.pk))
             slot.pid = None
             slot.host_ip = None
             slot.tape_request = None
@@ -159,17 +160,37 @@ def fix_missing_links():
        then restore the files to the restore area if the files are part of a *TapeRequest*"""
     # get all the restored and restoring files
     DUMMY_RUN = False
+
+    # loop over any files that are ONTAPE but have a link
+    tape_files = TapeFile.objects.filter(Q(stage=TapeFile.ONTAPE))
+    for f in tape_files:
+        if os.path.lexists(f.logical_path):
+            if os.path.exists(f.logical_path):
+                if not DUMMY_RUN:
+                    print("Restoring link to: " + f.logical_path)
+                    # restore status to RESTORED
+                    f.stage = TapeFile.RESTORED
+                    f.save()
+            else:
+                if not DUMMY_RUN:
+                    print("Removing link (1) to: " + f.logical_path)
+                    os.unlink(f.logical_path)
+                    f.stage = TapeFile.ONTAPE
+                    f.restore_disk = None
+                    f.save()
+
     tape_files = TapeFile.objects.filter(Q(stage=TapeFile.RESTORING) | Q(stage=TapeFile.RESTORED))
     for f in tape_files:
         if not os.path.exists(f.logical_path) and os.path.lexists(f.logical_path):
             # unlink
-            print("Removing link to: " + f.logical_path)
+            print("Removing link (2) to: " + f.logical_path)
             if not DUMMY_RUN:
-                os.remove(f.logical_path)
+                os.unlink(f.logical_path)
                 # set the stage to "ONTAPE"
                 f.stage = TapeFile.ONTAPE
                 f.restore_disk = None
                 f.save()
+
     # loop over any files that are ONDISK but actually missing
     tape_files = TapeFile.objects.filter(Q(stage=TapeFile.ONDISK))
     for f in tape_files:
@@ -180,7 +201,7 @@ def fix_missing_links():
                 f.stage = TapeFile.ONTAPE
                 f.restore_disk = None
                 f.save()
-
+    
 
 def fix_restore_links():
     """Fix any files that are stuck in RESTORING mode where the file actually exists in the restore area
@@ -220,6 +241,7 @@ def fix_restore_links():
                 tf.stage = TapeFile.ONTAPE
                 tf.restore_disk = None
                 tf.save()
+
 
 
 def create_request_for_on_disk_files():
@@ -449,6 +471,33 @@ def reset_removed_files():
     fh.close()
 
 
+def get_spot_list(spot_name, spot_path, logical_path):
+    print("Checking: ", spot_name)
+    try:
+        sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+        output = subprocess.check_output(sd_cmd).decode("utf-8")
+    except KeyboardInterrupt:
+        raise
+    except Exception as e:
+        print ("Failed", str(e))
+        output = ""
+    out_lines = output.split("\n")
+    file_list = []
+    size_list = []
+    for out_item in out_lines:
+        out_file = out_item.split()
+        if len(out_file) == 11:
+            spot_file_name = out_file[10]
+            spot_path_cmpts = spot_path.split("/")
+            local_spot_path = "/" + spot_path_cmpts[-2] + "/" + spot_path_cmpts[-1]
+            logical_file_name = spot_file_name.replace(local_spot_path, logical_path)
+            size = int(out_file[3])
+            if size > MIN_FILE_SIZE:
+                file_list.append(logical_file_name)
+                size_list.append(size)
+    return file_list, size_list
+
+
 def reset_all_removed_files():
     """Reset all the files that occur on the tape (via sd_ls) but have been removed from the NLA database"""
     response = requests.get(ON_TAPE_URL)
@@ -466,29 +515,7 @@ def reset_all_removed_files():
             continue
         spot_name, spot_path, logical_path = line.split()
 
-        print("Checking: ", spot_name)
-        try:
-            sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
-            output = subprocess.check_output(sd_cmd).decode("utf-8")
-        except KeyboardInterrupt:
-            raise
-        except Exception as e:
-            print ("Failed", str(e))
-            continue
-        out_lines = output.split("\n")
-        file_list = []
-        size_list = []
-        for out_item in out_lines:
-            out_file = out_item.split()
-            if len(out_file) == 11:
-                spot_file_name = out_file[10]
-                spot_path_cmpts = spot_path.split("/")
-                local_spot_path = "/" + spot_path_cmpts[-2] + "/" + spot_path_cmpts[-1]
-                logical_file_name = spot_file_name.replace(local_spot_path, logical_path)
-                size = int(out_file[3])
-                if size > MIN_FILE_SIZE:
-                    file_list.append(logical_file_name)
-                    size_list.append(size)
+        file_list, size_list = get_spot_list(spot_name, spot_path, logical_path)
 
 	# get a list of files in the NLA that are also in the file_list
         tfs = TapeFile.objects.filter(logical_path__in = file_list)
@@ -501,7 +528,7 @@ def reset_all_removed_files():
                 size = size_list[f]
                 if not fname in db_file_list:
                     try:
-                        tf = TapeFile(logical_path=fname, size=int(size), stage=TapeFile.UNVERIFIED)
+                        tf = TapeFile(logical_path=fname, size=int(size), stage=TapeFile.ONTAPE)
                         tf.save()
                         print ("Re-adding file: {}".format(fname))
                     except KeyboardInterrupt:
@@ -583,10 +610,13 @@ def delete_files_not_in_a_request():
         if rf not in restored_files_tapereq:
             # delete the file
             full_path = os.path.realpath(rf.logical_path)
-            print("DELETING {}".format(full_path))
-            os.unlink(full_path)
+            if os.path.exists(full_path):
+                os.unlink(full_path)
+                print("DELETING {}".format(full_path))
             # delete the link
-            os.unlink(rf.logical_path)
+            if os.path.exists(rf.logical_path):
+                os.unlink(rf.logical_path)
+                print("UNLINK   {}".format(rf.logical_path))
             # mark as on tape and save
             rf.stage = TapeFile.ONTAPE
             rf.save()
@@ -594,6 +624,48 @@ def delete_files_not_in_a_request():
             error_file_size += rf.size
 
     print("Size of deleted files: {}".format(filesizeformat(error_file_size)))
+
+
+def reset_deleted_files():
+    TapeFile.load_storage_paths()
+    del_files = TapeFile.objects.filter(stage=TapeFile.DELETED)
+    spot_contents = {}
+    for df in del_files:
+        # 1. check file exists on Tape
+        # 2. remove any symbolic link to the logical path
+        # 3. set the status to ON_TAPE
+        found = False
+        file_path = df.logical_path
+        while not found and len(file_path) > 0:
+            # get the sub path
+            try:
+                spot_name = TapeFile.fileset_logical_path_map[file_path]
+                found = True
+            except:
+                found = False
+                file_path = os.path.dirname(file_path)
+        if found:
+            # use sd_ls to find the file on tape
+            if not(spot_name in spot_contents):
+                spot_contents[spot_name] = get_spot_contents(spot_name)
+            # use just the basenames as identifiers
+            fname = os.path.basename(df.logical_path)
+            if fname in spot_contents[spot_name]:
+                # check if a logical link exists
+                if os.path.lexists(df.logical_path):
+                    # if the link points to a valid file then change to RESTORED
+                    if os.path.exists(df.logical_path):
+                        print("Changing file: {} to RESTORED".format(df.logical_path))
+                        df.stage = TapeFile.RESTORED
+                    else:
+                        print("Changing file: {} to ON_TAPE and removing symbolic link".format(df.logical_path))
+                        df.stage = TapeFile.ONTAPE
+                        os.unlink(df.logical_path)
+                    df.save()
+            else:
+                print("File: {} not found on via sd_ls".format(df.logical_path))
+        else:
+            print("File: {} not found on tape".format(df.logical_path))
 
 
 def reset_unverified_files():
@@ -606,11 +678,34 @@ def reset_unverified_files():
     # find the unverified files that are not there
     unverified_files = TapeFile.objects.filter(stage=TapeFile.UNVERIFIED)
     count = 0
+    spot_contents = {}
     for uf in unverified_files:
         if not os.path.exists(uf.logical_path):
-            print(uf.logical_path)
-            count += 1
-    print(count)
+            file_path = uf.logical_path
+            found = False
+            # os.path.dirname will return '/' as the last character
+            while not found and len(file_path) > 1:
+                # get the sub path
+                try:
+                    spot_name = TapeFile.fileset_logical_path_map[file_path]
+                    found = True
+                except:
+                    found = False
+                    file_path = os.path.dirname(file_path)
+            if found:
+                # use sd_ls to find the file on tape
+                if not(spot_name in spot_contents):
+                    spot_contents[spot_name] = get_spot_contents(spot_name)
+                # use just the basenames as identifiers
+                fname = os.path.basename(uf.logical_path)
+                if fname in spot_contents[spot_name]:
+                    print("Changing file: {} to ONTAPE".format(uf.logical_path))
+                    uf.stage = TapeFile.ONTAPE
+                    uf.save()
+            else:
+                print("File: {} not found on tape".format(uf.logical_path))
+        else:
+            print("File ONDISK: {}".format(uf.logical_path))
 
 
 def remove_migrated_files():
@@ -709,8 +804,92 @@ def fix_logical_path_in_db():
             print(t.logical_path, new_logical_path)
 
 def remove_duplicates():
-    """Remove any duplicates in the database."""
-    pass
+    """Remove any duplicates of TapeFiles in the database."""
+    # pk passed in as an arg sets the limit
+    if pk != None:
+        limit = int(pk)
+    else:
+        limit = TapeFile.objects.count()
+    print("Limit processing of duplicates to {} files".format(limit))
+    duplicates = TapeFile.objects.values(
+        "logical_path"
+    ).annotate(
+        file_count=Count("logical_path")
+    ).filter(
+        file_count__gt=1
+    )[:limit]
+    print("Number of logical_paths with duplicates: {}".format(duplicates.count()))
+    
+    for fd in duplicates:
+        files = TapeFile.objects.filter(logical_path=fd["logical_path"])
+        # check if all instances of the TapeFiles have the same stage.  If they do
+        # then we can just delete all but the first one
+        file_stages = [files[x].stage for x in range(0, files.count())]
+        if all(f == file_stages[0] for f in file_stages):
+            for f in files[1:]:
+                print("Deleting duplicate for : {} with stage : {}".format(
+                          f.logical_path, TapeFile.STAGE_NAMES[f.stage])
+                     )
+                f.delete()
+        else:
+            file_stage_names = [TapeFile.STAGE_NAMES[f] for f in file_stages]
+
+            # first case - UNVERIFIED and ON TAPE
+            if "UNVERIFIED" in file_stage_names and "ON TAPE" in file_stage_names:
+                # assume safely on tape
+                for f in files[1:]:
+                    print("Deleting duplicate for : {} with stage : {}".format(
+                          f.logical_path, TapeFile.STAGE_NAMES[f.stage])
+                    )
+                    f.delete()
+                print("Remapping : {} to stage : {}".format(
+                      f.logical_path, TapeFile.STAGE_NAMES[TapeFile.ONTAPE]))
+                files[0].stage = TapeFile.ONTAPE
+                files[0].restore_disk = None
+                files[0].save()
+
+            # second case - all permutations of RESTORED
+            elif "RESTORED" in file_stage_names:
+       	       	for f in files[1:]:
+                    print("Deleting duplicate for : {} with stage : {}".format(
+                          f.logical_path, TapeFile.STAGE_NAMES[f.stage])
+                    )
+                    f.delete()
+                # check if file is present - if it is then set to RESTORED, if not (or link is broken) 
+                # then set to ONTAPE
+                if os.path.exists(files[0].logical_path):
+                    print("Remapping : {} to stage : {}".format(
+                           f.logical_path, TapeFile.STAGE_NAMES[TapeFile.RESTORED]))
+                    files[0].stage = TapeFile.RESTORED
+                    if(files[0].restore_disk == None):
+                        print("No restore disk!")
+                    files[0].save()
+                else:
+                    print("Remapping : {} to stage : {}".format(
+                          f.logical_path, TapeFile.STAGE_NAMES[TapeFile.ONTAPE]))
+                    # remove the dead link
+                    if os.path.lexists(files[0].logical_path):
+                         os.remove(f.logical_path)
+                    files[0].stage = TapeFile.ONTAPE
+                    files[0].restore_disk = None
+                    files[0].save()
+
+
+def reset_restored_to_ontape():
+    # reset files in a listfile to ontape from whatever state they are in
+    if not pk:
+        print("Pass in listfile filename as 2nd argument")
+        return
+    fh = open(pk)
+    lines = fh.readlines()
+    for l in lines:
+        f = l.strip()
+        file = TapeFile.objects.get(logical_path=f)
+        if file.stage == TapeFile.RESTORED:
+            file.stage = TapeFile.ONTAPE
+            file.save()
+            print("Reset {} to ONTAPE".format(f))
+
 
 def run(*args):
     """Entry point for the Django script run via ``./manage.py runscript``
@@ -737,9 +916,11 @@ def run(*args):
        reset_unverified_files
        remove_migrated_files
        reset_ontape_to_unverified
+       reset_restored_to_ontape
        remap_spotpath_to_logical_path
        remove_duplicates
        fix_logical_path_in_db
+       reset_deleted_files
     """
 
     global pk
@@ -758,7 +939,7 @@ def run(*args):
     else:
         method = globals().get(a0)
         if a1 != None:
-            pk = int(a1)
+            pk = a1
         try:
             method()
         except Exception as e:

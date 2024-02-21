@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# sd_get: Command-line tool to download large numbers of files from StorageD
+#: Command-line tool to download large numbers of files from StorageD
 
 import sys
 import os
