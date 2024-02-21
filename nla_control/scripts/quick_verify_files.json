@@ -4,6 +4,7 @@
         "/neodc/sentinel2b",
         "/neodc/sentinel1a",
         "/neodc/sentinel1b",
-        "/badc/cascade"
+        "/badc/cascade",
+        "/neodc/esacci/cloud/data/version3/L2/ATSR2-AATSR/FLUX/v3.0/AATSR_ENVISAT/"
     ]
 }

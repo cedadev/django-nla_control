@@ -168,15 +168,15 @@ class RequestView(View):
             if req.last_files_on_disk:
                 data["last_files_on_disk"] = req.last_files_on_disk.isoformat()
             files = []
-            if len(req.files.all()) != 0:
-                for f in req.files.all():
-                    files.append(f.logical_path)
-            elif req.request_files:
-                for f in req.request_files.split():
-                    files.append(f)
-            elif req.request_patterns:
+            if req.request_patterns:
                 patt_files = TapeFile.objects.filter(logical_path__contains=req.request_patterns)
                 for f in patt_files:
+                    files.append(f.logical_path)
+            elif req.request_files:
+                for f in req.request_files.split("\n"):
+                    files.append(f)
+            elif len(req.files.all()) != 0:
+                for f in req.files.all():
                     files.append(f.logical_path)
 
             data["files"] = files
@@ -212,7 +212,7 @@ class RequestView(View):
         # 2. if a pattern is specified then add up the files that currently match the pattern
 
         if "request_files" in data:
-            file_reqs = TapeFile.objects.filter(logical_path__in=data["request_files"].split())
+            file_reqs = TapeFile.objects.filter(logical_path__in=data["request_files"].split("\n"))
         elif "patterns" in data:
             file_reqs = TapeFile.objects.filter(logical_path__contains=data["patterns"])
         else:

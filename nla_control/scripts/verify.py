@@ -76,8 +76,8 @@ def run(*args):
     print("Number of UNVERIFIED files: {}".format(n_files))
 
     # limit to last 100000 for test
-#    LIMIT = 100000
-#    files = files[n_files-LIMIT:]
+    #LIMIT = 100000
+    #files = files[n_files-LIMIT:]
 
     if "verify_now" in args:
         verify_now = True
@@ -119,6 +119,8 @@ def run(*args):
     # log files with errors
     error_log_files = []
 
+    # files not found
+    files_not_found = []
     for f in files:
         try:
             spot_logical_path, spot_name = f.spotname()
@@ -126,11 +128,15 @@ def run(*args):
             # sometimes it's not finding the spotname!
             print("Spotname not found for file: {}".format(f))
        	    continue
+        
         file_path = f._logical_path
         if TEST_VERSION:
             to_find = file_path     # test version verification is just calculate insitu
+            to_find_rel = to_find
         else:
             to_find = file_path.replace(spot_logical_path, "/datacentre/restorecache/archive/%s" % spot_name)
+            # also check for a relative path
+            to_find_rel = file_path.replace(spot_logical_path, "%s" % spot_name)
 
         # find all log files
         restore_log_search = CHKSUMSDIR + "/%s.chksums.*" % spot_name
@@ -163,7 +169,7 @@ def run(*args):
                 checksum = strip_line[0]
                 filename = strip_line[1]
                 # if the filename matches the required filename
-                if filename == to_find:
+                if (filename == to_find) or (filename == to_find_rel):
                     # set stage to ONDISK, set verification date
                     f.stage = TapeFile.ONDISK
                     f.verified = now
@@ -177,6 +183,8 @@ def run(*args):
                     break
             if file_found:
                 break
+        if not file_found:
+            files_not_found.append(to_find)
 
     # if no files don't keep the tape request
     if num_verified_files == 0:
@@ -195,3 +203,9 @@ def run(*args):
         print ("Errors in log files")
         for ef in error_log_files:
             print("    {}".format(ef))
+
+    if len(files_not_found) > 0:
+        print ()
+        print ("Files not found in any log file")
+        for f in files_not_found:
+            print("    {}".format(f))

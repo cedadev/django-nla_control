@@ -68,6 +68,8 @@ class TapeFile(models.Model):
           - **A**: RESTORING (1)
 
           - **R**: RESTORED (5)
+      
+          - **X**: DELETED (4)
 
        :var models.ForeignKey restore_disk: A reference to the RestoreDisk where the file has been restored to
     """
@@ -78,13 +80,13 @@ class TapeFile(models.Model):
     ONTAPE = 1
     RESTORING = 2
     ONDISK = 3
-    #    DELETED = 4    # NRM - deleted has been deleted as not actually needed - files will have to be reintroduced
-    #                   # into
+    DELETED = 4    # NRM - deleted has been restored
     RESTORED = 5
-    __CHOICES = ((ONTAPE, 'On tape'), (RESTORING, 'Restoring'),
-                 (ONDISK, 'On Disk'), (UNVERIFIED, 'Unverified'), (RESTORED, 'Restored'))
+    __CHOICES = ((ONTAPE, 'On tape'), (RESTORING, 'Restoring'), 
+                 (ONDISK, 'On Disk'), (UNVERIFIED, 'Unverified'), (RESTORED, 'Restored'),
+                 (DELETED, 'Deleted'))
 
-    STAGE_NAMES = ["UNVERIFIED", "ON TAPE", "restoring", "on disk", "D", "RESTORED"]
+    STAGE_NAMES = ["UNVERIFIED", "ON TAPE", "restoring", "on disk", "DELETED", "RESTORED"]
 
     logical_path = models.CharField(max_length=2024, help_text='logical path of archived files e.g. /badc/acsoe/file10.dat', db_index=True)
     size = FileSizeField(help_text='size of file in bytes')
@@ -315,8 +317,8 @@ class TapeRequest(models.Model):
         try:
             files = self.files.filter(Q(stage=TapeFile.ONDISK) | Q(stage=TapeFile.RESTORED))
             nfiles = len(files)
-            request_files = self.request_files
-            nreqfiles = len(request_files.split())
+            request_files = self.request_files.split()
+            nreqfiles = len(request_files)
             if self.label:
                 return "%i : %s [%s / %s files]" % (self.pk, self.label, nfiles, nreqfiles)
             elif self.request_patterns:
@@ -326,7 +328,6 @@ class TapeRequest(models.Model):
             elif nfiles == 1:
                 return "%i : Single File %s" % (self.pk, files[0])
             else:
-                nreq_files = len(self.request_files.all())
                 return "%i : %s ... [%s / %s files]" % (self.pk, files[0], nfiles, nreqfiles)
         except:
             return "No files present"
@@ -373,19 +374,19 @@ class TapeRequest(models.Model):
             return s['tot_size']
 
     def first_1000_files(self):
-        """Return a query set of the first 1000 files."""
+        """Return a query set of the first 5000 files."""
         # get the tape files:
-        tfiles = self.files.all()[0:1000]
+        tfiles = self.files.all()[0:5000]
         retstr = "\n".join([str(t) for t in tfiles])
         return retstr
-    first_1000_files.short_description = "First 1000 files known to NLA"
+    first_1000_files.short_description = "First 5000 files known to NLA"
 
 
     def first_1000_request_files(self):
-        """Return just the first 1000 request files."""
-        req_files = self.request_files.split("\n")[0:1000]
+        """Return just the first 5000 request files."""
+        req_files = self.request_files.split("\n")[0:5000]
         return "\n".join(req_files)
-    first_1000_request_files.short_description = "First 1000 request files"
+    first_1000_request_files.short_description = "First 5000 request files"
 
 
 class StorageDSlot(models.Model):
