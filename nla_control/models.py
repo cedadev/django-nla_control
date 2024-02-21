@@ -59,13 +59,13 @@ class TapeFile(models.Model):
        :var models.DateTimeField verified: The time and date that the file was verified within the NLA system
        :var models.IntegerField stage: The stage that the file is at, one of **UDTAR**
 
-          - **U**: UNVERIFIED (3)
+          - **U**: UNVERIFIED (0)
 
-          - **D**: ONDISK (2)
+          - **D**: ONDISK (3)
 
-          - **T**: ONTAPE (0)
+          - **T**: ONTAPE (1)
 
-          - **A**: RESTORING (1)
+          - **A**: RESTORING (2)
 
           - **R**: RESTORED (5)
 
@@ -78,13 +78,13 @@ class TapeFile(models.Model):
     ONTAPE = 1
     RESTORING = 2
     ONDISK = 3
-    #    DELETED = 4    # NRM - deleted has been deleted as not actually needed - files will have to be reintroduced
-    #                   # into
+    DELETED = 4    # NRM - reinstated DELETED so as to keep track of deleted files
     RESTORED = 5
-    __CHOICES = ((ONTAPE, 'On tape'), (RESTORING, 'Restoring'),
-                 (ONDISK, 'On Disk'), (UNVERIFIED, 'Unverified'), (RESTORED, 'Restored'))
+    __CHOICES = ((ONTAPE, 'On tape'), (RESTORING, 'Restoring'), 
+                 (ONDISK, 'On Disk'), (UNVERIFIED, 'Unverified'), (RESTORED, 'Restored'),
+                 (DELETED, 'Deleted'))
 
-    STAGE_NAMES = ["UNVERIFIED", "ON TAPE", "restoring", "on disk", "D", "RESTORED"]
+    STAGE_NAMES = ["UNVERIFIED", "ON TAPE", "restoring", "on disk", "Deleted", "RESTORED"]
 
     logical_path = models.CharField(max_length=2024, help_text='logical path of archived files e.g. /badc/acsoe/file10.dat', db_index=True)
     size = FileSizeField(help_text='size of file in bytes')
