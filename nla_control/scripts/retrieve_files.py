@@ -32,7 +32,7 @@ import socket
 from pytz import utc
 import sys, os
 
-from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
+from fbi_core import update_file_location
 
 
 def get_restore_disk(slot):
@@ -319,15 +319,7 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
         # modify the restored files in elastic search
         try:
             if len(restored_files) > 0:
-                fbi = CedaFbi(
-                        headers = {
-                            'x-api-key': CEDA_FBI_API_KEY
-                        }
-                      )
-                fbi.update_file_location(file_list=restored_files, on_disk=True)
-                #print "Updated Elastic Search index for files ",
-                #for f in restored_files:
-                #    print " - " + str(f)
+                update_file_location(path_list=restored_files, location="on_disk")
         except Exception as e:
             print("Failed updating Elastic Search Index ",)
             print(e, restored_files)

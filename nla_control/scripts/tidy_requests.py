@@ -16,7 +16,7 @@ import sys
 from pytz import utc
 from nla_control.settings import *
 from nla_control.scripts.process_requests import update_requests
-from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
+from fbi_core import update_file_location
 import subprocess
 
 __author__ = 'sjp23'
@@ -164,15 +164,7 @@ def tidy_requests():
         try:
             # Open connection to index and update files
             if len(removed_files) > 0:
-                fbi = CedaFbi(
-                          headers = {
-                              'x-api-key' : CEDA_FBI_API_KEY
-                        }
-                      )
-                fbi.update_file_location(file_list=removed_files, on_disk=False)
-            print("Updated Elastic Search index for files ",)
-            for f in removed_files:
-                print(" - " + str(f))
+                update_file_location(path_list=removed_files, location="on_tape")
         except Exception as e:
             print("Failed updating Elastic Search Index ",)
             print(e, removed_files)

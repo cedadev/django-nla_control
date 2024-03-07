@@ -11,7 +11,6 @@ from django.db.models import Count
 from nla_control.models import *
 from nla_control.settings import *
 from nla_control.scripts.tidy_requests import in_other_request
-import nla_control
 import os
 import re
 import datetime
