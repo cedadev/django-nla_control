@@ -729,6 +729,7 @@ def remove_migrated_files():
         except OSError:
             pass
 
+
 def reset_ontape_to_unverified():
     """Reset any files that are	marked as ONTAPE but actually appear on	the disk to UNVERIFIED.
        This is only if the file	is not a link."""
@@ -738,6 +739,7 @@ def reset_ontape_to_unverified():
        	    print("Reset {} to UNVERIFIED".format(of.logical_path))
             of.stage = TapeFile.UNVERIFIED
             of.save()
+
 
 def remap_spotpath_to_logical_path():
     """There seems to be some entries in the database with the spotname named mapped into the logical
@@ -789,6 +791,19 @@ def remap_spotpath_to_logical_path():
             else:
                 print("File does not exist {}, trying to remap {}".format(new_logical_path, f.logical_path))
 
+
+def remove_files_with_spotpath():
+    """Some files have /datacentre/archvol and are unverified.  Delete them from the NLA database"""
+    # get the list of UNVERIFIED files
+    pattern = "/datacentre/archvol"
+    unver_files = TapeFile.objects.filter(Q(stage=TapeFile.UNVERIFIED) & Q(logical_path__contains=pattern))
+    print("Number of erroneous files: {}".format(unver_files.count()))
+    # loop over every unverfied file that is in the wrong place!
+    for f in unver_files:
+        print(f"Deleting file: {f} as it contains the pattern: {pattern}")
+        f.delete()
+
+
 def fix_logical_path_in_db():
     """Some logical paths in the db contain b''.  Remove these."""
     # get a query set of duplicates:
@@ -802,6 +817,7 @@ def fix_logical_path_in_db():
             t.logical_path = new_logical_path
             t.save()
             print(t.logical_path, new_logical_path)
+
 
 def remove_duplicates():
     """Remove any duplicates of TapeFiles in the database."""
@@ -918,6 +934,7 @@ def run(*args):
        reset_ontape_to_unverified
        reset_restored_to_ontape
        remap_spotpath_to_logical_path
+       remove_files_with_spotpath
        remove_duplicates
        fix_logical_path_in_db
        reset_deleted_files
