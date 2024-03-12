@@ -4,7 +4,7 @@ import os
 
 # Create your tests here.
 
-from models import Quota, TapeRequest, TapeFile
+from models import Quota
 
 
 class SimpleTest(TestCase):

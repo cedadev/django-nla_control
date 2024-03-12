@@ -1,7 +1,7 @@
 # Create your views here.
 from django.http import HttpResponse
 from nla_control.models import *
-from django.shortcuts import redirect, render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404
 import json
 import datetime
 from django.views.generic import View

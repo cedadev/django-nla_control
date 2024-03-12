@@ -15,8 +15,6 @@ import datetime
 import sys
 from pytz import utc
 from nla_control.settings import *
-from nla_control.scripts.process_requests import update_requests
-from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
 import subprocess
 
 __author__ = 'sjp23'

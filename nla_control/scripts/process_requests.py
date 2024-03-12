@@ -18,22 +18,14 @@
 # import nla objects
 from nla_control.models import *
 from nla_control.settings import *
-import nla_control
 
 from django.core.mail import send_mail
 from django.db.models import Q
 
 import subprocess
-import datetime
-
-import time
-import re
-import socket
-from pytz import utc
-import sys, os
+import sys
 import random
 
-from ceda_elasticsearch_tools.index_tools import CedaFbi, CedaEo
 
 def update_requests():
     """Update all of the *TapeRequests* in the NLA system and mark *TapeRequests* as active or inactive.
