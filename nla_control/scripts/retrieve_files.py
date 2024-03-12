@@ -315,7 +315,7 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
                 # update the restore_disk
                 target_disk.update()
                 # add the filename to the restored filenames
-                restored_files.append(f.logical_path.encode("utf-8"))
+                restored_files.append(f.logical_path)
         # modify the restored files in elastic search
         try:
             if len(restored_files) > 0:

@@ -158,7 +158,7 @@ def tidy_requests():
                     print("Could not remove from archive: ", f.logical_path)
 
             # add to list of files to be altered in Elastic Search
-            removed_files.append(f.logical_path.encode("utf-8"))
+            removed_files.append(f.logical_path)
 
         print("Setting status of files in Elastic Search to not on disk")
         try:
