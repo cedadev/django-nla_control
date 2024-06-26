@@ -10,7 +10,6 @@ django-multiselectfield==0.1.12
 django-sizefield==2.1.0
 elastic-transport==8.13.1
 elasticsearch==8.14.0
-fbi-core==1.2.7
 idna==3.7
 psycopg2-binary==2.9.9
 pyparsing==3.1.2
