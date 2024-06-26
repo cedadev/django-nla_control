@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nla_control',
-    version='1.2.3',
+    version='1.2.4',
     packages=['nla_control'],
     install_requires=[
         'appdirs',
@@ -24,7 +24,6 @@ setup(
         'django-sizefield',
         'elastic-transport',
         'elasticsearch',
-        'fbi-core',
         'idna',
         'psycopg2-binary',
         'pyparsing',
