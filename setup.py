@@ -9,11 +9,11 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nla_control',
-    version='1.1.0',
+    version='1.2.0',
     packages=['nla_control'],
     install_requires=[
         'appdirs',
-        'django==2.2.13',
+        'django==4.2',
         'django-sizefield',
         'django-extensions',
         'django-multiselectfield',
@@ -21,7 +21,8 @@ setup(
         'pyparsing',
         'pytz',
         'requests',
-        'tqdm'
+        'tqdm',
+        'fbi-core @ git+https://github.com/cedadev/fbi-core.git#egg=fbi_core'
     ],
     include_package_data=True,
     license='my License',  # example license

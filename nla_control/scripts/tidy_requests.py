@@ -14,7 +14,7 @@ from nla_control.models import TapeFile, TapeRequest
 import datetime
 import sys
 from pytz import utc
-from nla_control.settings import *
+from nla_site.settings import *
 from nla_control.scripts.process_requests import update_requests
 from fbi_core import update_file_location
 import subprocess
