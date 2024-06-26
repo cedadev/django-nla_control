@@ -392,9 +392,9 @@ class RequestView(View):
                 [
                   {
                     "label": "Test request for 1986 data",
-                    "quota": "dhk63261",
+                    "quota": "dh6361",
                     "retention": "2017-04-01",
-                    "notify_on_first_file": "neil.massey@stfc.ac.uk"
+                    "notify_on_first_file": "neil.mossey@stfc.ac.uk"
                   }
                 ]
 
@@ -425,7 +425,7 @@ class RequestView(View):
         # get the quota so that we can get the user's email address
         quota= Quota.objects.filter(user=data["quota"])
         if len(quota) != 1:
-            error_msg = "No quota for user %s" % user
+            error_msg = "No quota for user %s" % data["quota"]
             return HttpResponse(json.dumps({"error": (error_msg)}),
                                 content_type="application/json",
                                 status=403,

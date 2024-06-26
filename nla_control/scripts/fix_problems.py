@@ -9,7 +9,7 @@
 # import nla objects
 from django.db.models import Count
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 from nla_control.scripts.tidy_requests import in_other_request
 import os
 import re
@@ -735,7 +735,7 @@ def reset_ontape_to_unverified():
     ontape_files = TapeFile.objects.filter(stage=TapeFile.ONTAPE)
     for	of in ontape_files:
        	if os.path.exists(of.logical_path) and not os.path.islink(of.logical_path):
-       	    print("Reset {} to UNVERIFIED".format(of.logical_path))
+            print("Reset {} to UNVERIFIED".format(of.logical_path))
             of.stage = TapeFile.UNVERIFIED
             of.save()
 

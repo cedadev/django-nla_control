@@ -17,7 +17,7 @@
 
 # import nla objects
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 import nla_control
 
 from django.core.mail import send_mail
@@ -169,7 +169,7 @@ def create_retrieve_listing(slot, target_disk):
             spot_logical_path, spot_name = f.spotname()
         except:
             print("Spotname name not found for file: {}".format(f))
-       	    continue
+            continue
         # get a list of files in the spot if not already got
         if spot_name not in spot_list:
             spot_list[spot_name] = get_spot_contents(spot_name)
