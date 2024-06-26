@@ -1,4 +1,5 @@
 appdirs==1.4.4
+asgiref==3.8.1
 Django==4.2
 django-sizefield==2.1.0
 django-extensions==3.2.3
@@ -9,5 +10,6 @@ pytz==2024.1
 requests==2.31.0
 tqdm==4.66.4
 ceda-elasticsearch-client
+sqlparse==0.5.0
 setuptools
 fbi_core @ git+https://github.com/cedadev/fbi-core.git#egg=fbi_core
