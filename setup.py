@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
@@ -9,8 +9,8 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nla_control',
-    version='1.2.4',
-    packages=['nla_control'],
+    version='1.2.5',
+    packages=find_packages(),
     install_requires=[
         'appdirs',
         'asgiref',
