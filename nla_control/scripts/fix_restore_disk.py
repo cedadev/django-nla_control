@@ -14,7 +14,7 @@ This is designed to be used via the django-extensions runscript command
 
 # import nla objects
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 
 def run():
     """Entry point for the Django script"""

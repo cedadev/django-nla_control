@@ -17,7 +17,7 @@
 from nla_control.models import TapeFile
 import os, sys
 import requests
-from nla_control.settings import *
+from nla_site.settings import *
 import subprocess
 
 __author__ = 'sjp23'

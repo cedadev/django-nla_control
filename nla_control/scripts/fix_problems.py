@@ -28,7 +28,7 @@ pk=None
 def get_spot_contents(spot_name):
     """Get a list of the files in the spot `spot_name`"""
 
-    sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+    sd_cmd = ["/usr/bin/python3", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
     try:
         output = subprocess.check_output(sd_cmd).decode("utf-8")
     except subprocess.CalledProcessError:
@@ -434,7 +434,7 @@ def reset_removed_files():
     for spot_name in spot_files:
         print("Working on spot: ", spot_name, )
         # should be able to replace this with get_spot_contents
-        sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+        sd_cmd = ["/usr/bin/python3", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
         print("... sd_ls completed")
         output = subprocess.check_output(sd_cmd).decode("utf-8")
         out_lines = output.split("\n")
@@ -473,7 +473,7 @@ def reset_removed_files():
 def get_spot_list(spot_name, spot_path, logical_path):
     print("Checking: ", spot_name)
     try:
-        sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+        sd_cmd = ["/usr/bin/python3", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
         output = subprocess.check_output(sd_cmd).decode("utf-8")
     except KeyboardInterrupt:
         raise

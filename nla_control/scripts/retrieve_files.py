@@ -123,7 +123,7 @@ def send_end_email(slot):
 
 def get_spot_contents(spot_name):
     """Get a list of the files in the spot `spot_name`"""
-    sd_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
+    sd_cmd = ["/usr/bin/python3", "/usr/bin/sd_ls", "-s", spot_name, "-L", "file"]
     try:
         output = subprocess.check_output(sd_cmd).decode("utf-8")
     except subprocess.CalledProcessError:
@@ -222,8 +222,8 @@ def start_sd_get(slot, file_listing_filename, target_disk):
         sd_get_cmd = [sys.executable, pth, "/bin/sd_get_emulator"]
         sd_get_cmd.extend(sd_get_args)
     else:
-        # this is a bit hacky but sd_get uses the system python2.7, rather than the venv one
-        sd_get_cmd = ["/usr/bin/python2.7", "/usr/bin/sd_get"]
+        # this is a bit hacky but sd_get uses the system python3, rather than the venv one
+        sd_get_cmd = ["/usr/bin/python3", "/usr/bin/sd_get"]
         sd_get_cmd.extend(sd_get_args)
 
     # mark request as started

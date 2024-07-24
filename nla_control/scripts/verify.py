@@ -9,7 +9,7 @@ import os
 import datetime
 import sys
 import subprocess
-from nla_control.settings import *
+from nla_site.settings import *
 
 # load storage paths to do path translation to from logical to storage paths.
 TapeFile.load_storage_paths()
@@ -127,7 +127,7 @@ def run(*args):
         except TapeFileException:
             # sometimes it's not finding the spotname!
             print("Spotname not found for file: {}".format(f))
-       	    continue
+            continue
         
         file_path = f._logical_path
         if TEST_VERSION:

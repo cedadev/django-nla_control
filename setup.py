@@ -9,12 +9,13 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nla_control',
-    version='1.2.5',
+    version='1.2.6',
     packages=find_packages(),
     install_requires=[
         'appdirs',
         'asgiref',
         'certifi',
+        'ceda-elasticsearch-client',
         'charset-normalizer',
         'click',
         'colorama',

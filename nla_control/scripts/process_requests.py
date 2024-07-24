@@ -11,13 +11,14 @@
  ``$ python manage.py runscript queue_requests``
 
 """
+
 #
 # SJP 2016-02-09
 # NRM 2017-01-25
 
 # import nla objects
 from nla_control.models import *
-from nla_control.settings import *
+from nla_site.settings import *
 
 from django.core.mail import send_mail
 from django.db.models import Q
@@ -30,23 +31,25 @@ import random
 def update_requests():
     """Update all of the *TapeRequests* in the NLA system and mark *TapeRequests* as active or inactive.
 
-       *TapeRequests* are active if:
-           - There are ``request_files`` in a *TapeRequest* which are present in the NLA system and have the
-             stage of being ONTAPE
-           - There are files in the NLA system which match ``request_patterns`` and have the stage of being
-             ONTAPE
+    *TapeRequests* are active if:
+        - There are ``request_files`` in a *TapeRequest* which are present in the NLA system and have the
+          stage of being ONTAPE
+        - There are files in the NLA system which match ``request_patterns`` and have the stage of being
+          ONTAPE
 
-       This allows requests to be made for files that are not currently in the NLA system but may be made
-       available in the future.  This in turn allows users to request files that they know will be appearing
-       (for example Sentinel data) without having to submit further requests.
+    This allows requests to be made for files that are not currently in the NLA system but may be made
+    available in the future.  This in turn allows users to request files that they know will be appearing
+    (for example Sentinel data) without having to submit further requests.
 
     """
-    requests = TapeRequest.objects.all().order_by('request_date')
+    requests = TapeRequest.objects.all().order_by("request_date")
 
     for r in requests:
         new_files = []
         present_tape_files = []
-        print("    Request ID " + str(r.id) + " user " + r.quota.user,)
+        print(
+            "    Request ID " + str(r.id) + " user " + r.quota.user,
+        )
         # check whether the number of files downloaded is the same number as requested and continue if it is
         nfiles = r.files.filter(Q(stage=TapeFile.ONDISK) | Q(stage=TapeFile.RESTORED))
         nreq_files = len(r.request_files.split())
@@ -58,12 +61,18 @@ def update_requests():
         if r.quota.user == "_VERIFY":
             # Special case for verify to speed up process_requests
             request_files = r.request_files.split()
-            present_tape_files = TapeFile.objects.filter(Q(stage=TapeFile.UNVERIFIED) & Q(logical_path__in=request_files))
+            present_tape_files = TapeFile.objects.filter(
+                Q(stage=TapeFile.UNVERIFIED) & Q(logical_path__in=request_files)
+            )
             if len(present_tape_files) != 0:
                 r.active_request = True
                 r.files.set(present_tape_files.all())
                 r.save()
-                print("       making active with " + str(present_tape_files.count()) + " new files")
+                print(
+                    "       making active with "
+                    + str(present_tape_files.count())
+                    + " new files"
+                )
             else:
                 print()
             continue
@@ -73,11 +82,17 @@ def update_requests():
             # get the files in the request
             request_files = r.request_files.split()
             # get the TapeFile QuerySet for the files that are in the request and present on tape in the NLA system
-            new_files = TapeFile.objects.filter((Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING)) & Q(logical_path__in=request_files))
+            new_files = TapeFile.objects.filter(
+                (Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING))
+                & Q(logical_path__in=request_files)
+            )
 
         elif r.request_patterns != "":
             # if the request is a pattern request
-            new_files = TapeFile.objects.filter((Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING)) & Q(logical_path__contains=r.request_patterns))
+            new_files = TapeFile.objects.filter(
+                (Q(stage=TapeFile.ONTAPE) | Q(stage=TapeFile.RESTORING))
+                & Q(logical_path__contains=r.request_patterns)
+            )
 
         if new_files.count() != 0:
             r.files.add(*(list(new_files.all())))
@@ -93,15 +108,16 @@ def update_requests():
 def adjust_slots():
     """Create or remove storage D slots if the current number of slots is different to the value of
     ``STORAGED_SLOTS`` in ``settings.py``.  If ``STORAGED_SLOTS`` is higher than the current number of slots
-    then just append some slots.  If it is lower than the current number of slots then delete the last slots."""
+    then just append some slots.  If it is lower than the current number of slots then delete the last slots.
+    """
 
     number_of_slots = len(StorageDSlot.objects.all())
     if number_of_slots < STORAGED_SLOTS:
         for i in range(STORAGED_SLOTS - number_of_slots):
             StorageDSlot().save()
     elif number_of_slots > STORAGED_SLOTS:
-        slots = StorageDSlot.objects.filter(tape_request=None).order_by('-pk')
-        for slot in slots[:number_of_slots - STORAGED_SLOTS]:
+        slots = StorageDSlot.objects.filter(tape_request=None).order_by("-pk")
+        for slot in slots[: number_of_slots - STORAGED_SLOTS]:
             slot.delete()
 
 
@@ -114,8 +130,8 @@ def load_slots():
     # first come first served
     # NRM - 28/04/2021 - older requests that are not completing are currently blocking the progress of newer requests
     # change the order to a random order until a better solution can be found
-    requests = TapeRequest.objects.filter(active_request=True).order_by('-request_date')
-    request_order = list(range(0,requests.count()))
+    requests = TapeRequest.objects.filter(active_request=True).order_by("-request_date")
+    request_order = list(range(0, requests.count()))
     random.shuffle(request_order)
     irequest = 0
 
@@ -127,9 +143,11 @@ def load_slots():
             # if the slot continues a non-active (completed) request then reset the slot
             if not slots[s].tape_request.active_request:
                 slot = slots[s]
-                print("Removing request {} from slot {} as request is no longer active".format(
-                          slot.tape_request.pk, slot.pk)
-                     )
+                print(
+                    "Removing request {} from slot {} as request is no longer active".format(
+                        slot.tape_request.pk, slot.pk
+                    )
+                )
                 slot.tape_request = None
                 slot.save()
             else:
@@ -138,8 +156,11 @@ def load_slots():
         # find the next request
         while irequest < len(request_order):
             # check whether this request is already in a slot
-            c_request = request_order[irequest] # map from random list
-            if StorageDSlot.objects.filter(tape_request=requests[c_request]).count() != 0:
+            c_request = request_order[irequest]  # map from random list
+            if (
+                StorageDSlot.objects.filter(tape_request=requests[c_request]).count()
+                != 0
+            ):
                 # on to the next one
                 irequest += 1
                 continue
@@ -163,37 +184,40 @@ def load_slots():
             if user_slots + 1 > MAX_SLOTS_PER_USER:
                 # need to go onto the next request
                 irequest += 1
-       	    else:
-       	       	break
+            else:
+                break
 
         # check if any requests left to add - end loop if not
         if irequest >= requests.count():
             break
 
         # assign the request to the slot
-       	slot = slots[s]
+        slot = slots[s]
         slot.tape_request = requests[c_request]
-        print("Assigning request {} to slot {}".format(
-                   slot.tape_request.pk, slot.pk)
-             )
-       	slot.save()
-       	irequest += 1
+        print("Assigning request {} to slot {}".format(slot.tape_request.pk, slot.pk))
+        slot.save()
+        irequest += 1
+
 
 def run():
-    """ Entry point for the Django script run via ``./manage.py runscript``
+    """Entry point for the Django script run via ``./manage.py runscript``
 
-        The algorithm / order to run the above functions is
-          - ``update_requests``
+    The algorithm / order to run the above functions is
+      - ``update_requests``
 
-          - ``adjust_slots``
+      - ``adjust_slots``
 
-          - ``load slots``
+      - ``load slots``
 
     """
 
     # First of all check if the process is running - if it is then don't start running again
     try:
-        lines = subprocess.check_output(["ps", "-f", "-u", "badc"]).decode("utf-8").split("\n")
+        lines = (
+            subprocess.check_output(["ps", "-f", "-u", "badc"])
+            .decode("utf-8")
+            .split("\n")
+        )
         n_processes = 0
         for l in lines:
             if "process_requests" in l and not "/bin/sh" in l:
@@ -201,7 +225,7 @@ def run():
     except:
         n_processes = 1
 
-    if n_processes > 1:   # this process counts as one process_requests processx
+    if n_processes > 1:  # this process counts as one process_requests processx
         print("Process already running exiting")
         sys.exit()
 
