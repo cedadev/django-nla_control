@@ -645,11 +645,12 @@ def reset_deleted_files():
                 file_path = os.path.dirname(file_path)
         if found:
             # use sd_ls to find the file on tape
-            if not(spot_name in spot_contents):
-                spot_contents[spot_name] = get_spot_contents(spot_name)
+#            if not(spot_name in spot_contents):
+#                spot_contents[spot_name] = get_spot_contents(spot_name)
             # use just the basenames as identifiers
-            fname = os.path.basename(df.logical_path)
-            if fname in spot_contents[spot_name]:
+#            fname = os.path.basename(df.logical_path)
+#            if fname in spot_contents[spot_name]:
+            if True:
                 # check if a logical link exists
                 if os.path.lexists(df.logical_path):
                     # if the link points to a valid file then change to RESTORED
@@ -834,7 +835,7 @@ def remove_duplicates():
         file_count__gt=1
     )[:limit]
     print("Number of logical_paths with duplicates: {}".format(duplicates.count()))
-    
+
     for fd in duplicates:
         files = TapeFile.objects.filter(logical_path=fd["logical_path"])
         # check if all instances of the TapeFiles have the same stage.  If they do
@@ -905,6 +906,11 @@ def reset_restored_to_ontape():
             file.save()
             print("Reset {} to ONTAPE".format(f))
 
+def delete_quick_verify():
+    tr = TapeRequest.objects.filter(quota__user="_VERIFY")
+    for t in tr:
+        print(t)
+        t.delete()
 
 def run(*args):
     """Entry point for the Django script run via ``./manage.py runscript``
@@ -937,6 +943,7 @@ def run(*args):
        remove_duplicates
        fix_logical_path_in_db
        reset_deleted_files
+       delete_quick_verify
     """
 
     global pk

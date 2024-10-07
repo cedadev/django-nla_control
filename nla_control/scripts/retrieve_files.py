@@ -170,19 +170,28 @@ def create_retrieve_listing(slot, target_disk):
         except:
             print("Spotname name not found for file: {}".format(f))
             continue
-        # get a list of files in the spot if not already got
-        if spot_name not in spot_list:
-            spot_list[spot_name] = get_spot_contents(spot_name)
+
         if TEST_VERSION:
             to_retrieve = f.logical_path
         else:
             to_retrieve = f.logical_path.replace(spot_logical_path, "/archive/%s" % spot_name)
 
         to_check = os.path.basename(to_retrieve)
-        # check it's in the spot on sd
-        # spot list is now a list of dictionaries with the file name to check as the key
-        spot_list_keys = [list(s.keys())[0] for s in spot_list[spot_name]]
-        if to_check in spot_list_keys:
+
+        check_spot = False
+        if check_spot:
+            # get a list of files in the spot if not already got
+            if spot_name not in spot_list:
+                spot_list[spot_name] = get_spot_contents(spot_name)
+
+            # check it's in the spot on sd
+            # spot list is now a list of dictionaries with the file name to check as the key
+            spot_list_keys = [list(s.keys())[0] for s in spot_list[spot_name]]
+            in_spot = to_check in spot_list_keys
+        else:
+            in_spot = True
+
+        if in_spot:
             retrieved_to_file_map[to_retrieve] = f
             file_listing.write(to_retrieve + "\n")
             f.stage = TapeFile.RESTORING
@@ -254,7 +263,6 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
     :param RestoreDisk target_disk: *RestoreDisk* object containing the mountpoint where files will be written to
     :param retrieved_to_file_map: Mapping of spot filepaths to logical file paths, created by ``create_retrieve_listing``
     """
-    """ """
     # setup log file to read
     files_retrieved = 0
     log_file = None
