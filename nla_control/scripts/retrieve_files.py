@@ -296,12 +296,17 @@ def wait_sd_get(p, slot, log_file_name, target_disk, retrieved_to_file_map):
                 f = retrieved_to_file_map[restored_archive_file_path]
                 # link file to final archive location
                 try:
-                    if os.path.exists(f.logical_path):
-                        if os.path.islink(f.logical_path):
+                    # if it is a link
+                    #    if the file doesn't exist then unlink and relink
+                    #    if the file does exist then raise except
+                    if os.path.islink(f.logical_path):
+                        if os.path.exists(f.logical_path):
+                            raise Exception(
+                                "File exists and is not a link".format(f.logical_path)
+                            )
+                        else:
                             os.unlink(f.logical_path)
                             os.symlink(local_restored_path, f.logical_path)
-                        else:
-                            raise Exception("File exists and is not a link".format(f.logical_path))
                     else:
                         os.symlink(local_restored_path, f.logical_path)
                 except:
@@ -521,6 +526,12 @@ def run():
 
     print("Start retrieval runs for a slot")
 
+    # load storage paths to do path translation to from logical to storage paths.
+    if not spaths_loaded:
+        print("Load storage paths")
+        TapeFile.load_storage_paths()
+        spaths_loaded = True
+
     for slot in StorageDSlot.objects.all():
         if slot.tape_request is None:
             print("  No request for slot %s" % slot.pk)
@@ -530,13 +541,7 @@ def run():
             check_happy(slot)
             continue
         else:
-            # load storage paths to do path translation to from logical to storage paths.
             print("  Process slot %s" % slot.pk)
-            if not spaths_loaded:
-                print("Load storage paths")
-                TapeFile.load_storage_paths()
-                spaths_loaded = True
-
             if start_retrieval(slot):
                break
 
