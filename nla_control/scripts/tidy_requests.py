@@ -92,8 +92,8 @@ def tidy_requests():
             # Check if the file does not exist on the disk anymore - but only remove it if it is still in a restored state
             if not os.path.exists(f.logical_path):
                 if f.stage == TapeFile.RESTORED:
-                    print("File requests exists, but file is not on the disk. Setting stage to DELETED:", f.logical_path)
-                    f.stage = TapeFile.DELETED
+                    print("File requests exists, but file is not on the disk. Setting stage to ON_TAPE:", f.logical_path)
+                    f.stage = TapeFile.ONTAPE
                     f.save()
                 continue
             file_mod = datetime.datetime.fromtimestamp(os.path.getmtime(f.logical_path), utc)
