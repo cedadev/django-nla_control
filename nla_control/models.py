@@ -111,7 +111,7 @@ class TapeFile(models.Model):
         TapeFile.fileset_logical_path_map = {}
         TapeFile.fileset_logical_paths = []
 
-        # make a dictotionary that maps logical paths to spot names
+        # make a dictionary that maps logical paths to spot names
         for line in page:
             line = str(line.strip())
             if line == '':
