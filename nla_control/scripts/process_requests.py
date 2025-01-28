@@ -128,7 +128,6 @@ def load_slots():
     in ``settings.py``.
     """
     # first come first served
-    # NRM - 28/04/2021 - older requests that are not completing are currently blocking the progress of newer requests
     # change the order to a random order until a better solution can be found
     requests = TapeRequest.objects.filter(active_request=True).order_by("-request_date")
     request_order = list(range(0, requests.count()))
