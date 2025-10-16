@@ -10,7 +10,6 @@ metadata:
     - "manager:neil-massey"
     - "deputy-manager:matthew-paice"
     - "review:passed"
-    - "host:nla3.ceda.ac.uk"
   annotations:
     backstage.io/techdocs-ref: dir:.
   links: 
