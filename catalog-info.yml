@@ -48,7 +48,7 @@ spec:
   dependencyOf: 
     - system:default/nla
   dependsOn:
-    - system/default/virtual-machines
+    - system:default/virtual-machines
   lifecycle: production
 
 ---
@@ -74,6 +74,6 @@ spec:
   dependencyOf: 
     - system:default/nla
   dependsOn:
-    - system/default/virtual-machines
+    - system:default/virtual-machines
   lifecycle: production
 
