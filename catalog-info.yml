@@ -38,8 +38,8 @@ metadata:
     - "deputy-manager:matthew-paice"
     - "review:passed"
   links: 
-    - url: nla3.ceda.ac.uk
-      title: "nla3.ceda.ac.uk"
+    - url: "https://nla3.ceda.ac.uk"
+      title: "nla3-ceda-ac-uk"
       icon: externalLink
 spec:
   type: kubernetes
@@ -64,8 +64,8 @@ metadata:
     - "deputy-manager:matthew-paice"
     - "review:passed"
   links: 
-    - url: nla4.ceda.ac.uk
-      title: "nla4.ceda.ac.uk"
+    - url: "https://nla4.ceda.ac.uk"
+      title: "nla4-ceda-ac-uk"
       icon: externalLink
 spec:
   type: kubernetes
