@@ -41,7 +41,7 @@ metadata:
       title: "nla3-ceda-ac-uk"
       icon: externalLink
 spec:
-  type: kubernetes
+  type: rocky9-linux-vm
   owner: group:default/developers
   system: system:default/nla
   dependencyOf: 
@@ -67,7 +67,7 @@ metadata:
       title: "nla4-ceda-ac-uk"
       icon: externalLink
 spec:
-  type: kubernetes
+  type: rocky9-linux-vm
   owner: group:default/developers
   system: system:default/nla
   dependencyOf: 
