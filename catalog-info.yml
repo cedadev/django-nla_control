@@ -14,7 +14,7 @@ metadata:
     backstage.io/techdocs-ref: dir:.
   links: 
     - url: nla.ceda.ac.uk
-      title: "nla.ceda.ac.uk"
+      title: "nla-ceda-ac-uk"
       icon: externalLink
 spec:
   owner: group:default/developers
