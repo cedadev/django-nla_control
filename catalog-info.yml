@@ -1,0 +1,79 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: nla
+  description: "django-nla_control contains a Django application to control and manage the Near Line Archive (NLA) system at CEDA. Some files at CEDA are stored only on tape, and not on disk. Therefore, users cannot access them in the usual manner. These files are moved to tape due to the large size of their dataset, for example, Sentinel and CMIP data. The NLA allows users to temporarily restore files (to nla_cache) so that they can be accessed via the usual methods (MOLES / download / DAP / JASMIN mount point)."
+  tags:
+    - "priority:medium"
+    - "visibility:public"
+    - "manager:neil-massey"
+    - "deputy-manager:matthew-paice"
+    - "review:passed"
+    - "host:nla3.ceda.ac.uk"
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links: 
+    - url: nla.ceda.ac.uk
+      title: "nla.ceda.ac.uk"
+      icon: externalLink
+spec:
+  owner: group:default/developers
+  domain: domain:default/ceda-systems
+  lifecycle: production
+  dependsOn:
+    - component:default/nla3-ceda-ac-uk
+    - component:default/nla4-ceda-ac-uk
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: nla3-ceda-ac-uk
+  description: "VM used to deploy NLA to"
+  tags:
+    - "priority:high"
+    - "visibility:public"
+    - "manager:neil-massey"
+    - "deputy-manager:matthew-paice"
+    - "review:passed"
+  links: 
+    - url: nla3.ceda.ac.uk
+      title: "nla3.ceda.ac.uk"
+      icon: externalLink
+spec:
+  type: kubernetes
+  owner: group:default/developers
+  system: system:default/nla
+  dependencyOf: 
+    - system:default/nla
+  dependsOn:
+    - system/default/virtual-machines
+  lifecycle: production
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: nla4-ceda-ac-uk
+  description: "VM used to deploy NLA to"
+  tags:
+    - "priority:high"
+    - "visibility:public"
+    - "manager:neil-massey"
+    - "deputy-manager:matthew-paice"
+    - "review:passed"
+  links: 
+    - url: nla4.ceda.ac.uk
+      title: "nla4.ceda.ac.uk"
+      icon: externalLink
+spec:
+  type: kubernetes
+  owner: group:default/developers
+  system: system:default/nla
+  dependencyOf: 
+    - system:default/nla
+  dependsOn:
+    - system/default/virtual-machines
+  lifecycle: production
+
