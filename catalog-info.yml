@@ -20,9 +20,76 @@ spec:
   owner: group:default/developers
   domain: domain:default/ceda-systems
   lifecycle: production
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: django-nla-control
+  description: "django-nla-control contains the near line archive management functionality for the CEDA archive. On user request it schedules and moves data from tape to the nla-cache disk."
+  tags:
+    - "priority:high"
+    - "visibility:private"
+    - "manager:neil-massey"
+    - "deputy-manager:matthew-paice"
+    - "review:passed"
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links: 
+    - url: "https:\\nla.ceda.ac.uk"
+      title: "nla-ceda-ac-uk"
+      icon: externalLink
+spec:
+  type: library
+  owner: group:default/developers
+  lifecycle: production
+  system: system:default/nla
   dependsOn:
+    - resource:default/nla-db
+    - resource:default/nla-user-db
     - component:default/nla3-ceda-ac-uk
     - component:default/nla4-ceda-ac-uk
+    - component:default/cedaarchiveapp
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: nla-db
+  description: The nla database
+  tags:
+    - "priority:high"
+    - "visibility:public"
+    - "manager:andrew-harwood"
+    - "review:passed"
+    - "host:db6"
+spec:
+  type: database
+  owner: group:default/developers
+  system: system:default/nla
+  dependsOn: 
+    - component:default/db6
+  lifecycle: production
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: nla-user-db
+  description: The nla user Database
+  tags:
+    - "priority:high"
+    - "visibility:public"
+    - "manager:andrew-harwood"
+    - "review:passed"
+    - "host:db6"
+spec:
+  type: database
+  owner: group:default/developers
+  system: system:default/nla
+  dependsOn: 
+    - component:default/db6
+  lifecycle: production
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -44,10 +111,9 @@ spec:
   type: rocky9-linux-vm
   owner: group:default/developers
   system: system:default/nla
-  dependencyOf: 
-    - system:default/nla
   dependsOn:
     - system:default/virtual-machines
+    - resource:default/ceda-archive-datacentre
   lifecycle: production
 
 ---
@@ -70,9 +136,8 @@ spec:
   type: rocky9-linux-vm
   owner: group:default/developers
   system: system:default/nla
-  dependencyOf: 
-    - system:default/nla
   dependsOn:
     - system:default/virtual-machines
+    - resource:default/ceda-archive-datacentre
   lifecycle: production
 
